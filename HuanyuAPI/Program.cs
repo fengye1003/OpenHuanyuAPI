@@ -30,6 +30,10 @@ namespace HuanyuAPI
         {
             Log.EnableLogs = false;
             Log.EnableWriting = false;
+            if (!Directory.Exists("./Properties/"))
+            {
+                Directory.CreateDirectory("./Properties/");
+            }
             string PropertiesPath = "./Properties/Main.properties";
             Config = PropertiesHelper.AutoCheck(ConfigStandard, PropertiesPath);
             if ((string)Config["type"]! != "HuanyuApiConfig")
