@@ -16,6 +16,16 @@
             { "inputPortNum", "\n\n确认端口号\n" +
                 "请输入你希望运行在的端口号，端口号应当介于1~65535间。\n" +
                 "端口号："},
+            { "inputIpRestrict", "\n\nIP地址限制\n" +
+                "请输入你希望服务运行的IP地址，\n" +
+                "如果你正在使用反向代理，请输入127.0.0.1；\n" +
+                "如果你有单独的IP设置，请在此输入；\n" +
+                "如果你希望开放所有访问，或者看不懂这是什么，请输入*或者留空。\n" +
+                "IP："},
+            { "inputEnableXReserveProxy", "\n\n是否启用反向代理读取？\n" +
+                "如果启用了反向代理，请启用此项来允许读取headers，否则将无法获取真实的用户IPv4地址。\n" +
+                "如需启用反向代理读取，请输入1，否则请输入0.\n" +
+                "输入你的选择："},
             { "inputEnableLogs", "\n\n是否启用日志输出？\n" +
                 "如果启用日志，当API被调用时、发生错误时和用户输入反馈将被输出到控制台以供查阅。\n" +
                 "如需启用日志，请输入1，否则请输入0.\n" +
@@ -29,7 +39,12 @@
                 "如需开启日志自动清理，请输入需要保存的日志文件个数（每天一个文件）。输入 0 将会禁用此功能。\n" +
                 "输入参数："},
             { "initializeComplete", "\n\n成功完成配置所有配置项！已保存配置。即将启动主程序..."},
-            { "logAction", "来自{user}的用户访问了{name}。"}
+            { "logAction", "来自{user}的用户访问了{name}。"},
+            { "logActionWithResult", "来自{user}的用户访问了{name}，结果为{result}。"},
+            { "logActionWithNotFound", "来自{user}的用户或扫描器访问了{name}，路径不存在返回了404。"},
+            { "logActionWithException", "来自{user}的用户访问了{name}，引发异常：{exception}"},
+            { "logActionBlocked", "来自{user}的用户访问了{name}，但由于{reason}被拦截。细节：{details}。"},
+            { "pathAuthError", "【未授权或不存在的访问目标，可能的注入攻击】"}
         };
         static Dictionary<string, string> EN_US = new()
         {
@@ -42,7 +57,17 @@
             { "unsupportedLanguageOnSetting", "Unsupported language. Please check all available in the list above and try again. Input causing error: "},
             { "inputPortNum", "\n\nSet port number\n" +
                 "Enter port number the app should runs on. Port number should be in [1,65535].\n" +
-                "Port："},
+                "Port: "},
+            { "inputIpRestrict", "\n\nIP Address Restrict\n" +
+                "Please enter the IP address where you want the service to run. \n" +
+                "If you are using a reverse proxy, enter 127.0.0.1. \n" +
+                "If you have a separate IP configuration, enter it here. \n" +
+                "If you want to allow all access, or if you don't understand what this is, enter * or leave it blank.\n" +
+                "IP: "},
+            { "inputEnableXReserveProxy", "\n\nEnable reverse proxy read?\n" +
+                "If reverse proxy is enabled, enable this option to allow header reading. Otherwise, the actual user IPv4 address cannot be obtained. \n" +
+                "Enter 1 to enable reverse proxy reading, or 0 to disable.\n" +
+                "Enter your choice: "},
             { "inputEnableLogs", "\n\nEnable Logs Output?\n" +
                 "If enabled, the console will print API-using event, error logs and users' action report.\n" +
                 "Input 1 to enable. Input 0 to disable.\n" +
@@ -56,7 +81,12 @@
                 "Input how many logfiles you want to save to enable this function (One new file will be created per day). Input 0 to disable this function.\n" +
                 "Input value: "},
             { "initializeComplete", "\n\nCompleted all configurations! Config saved. Launching main program..."},
-            { "logAction", "User from {user} accessed {name}."}
+            { "logAction", "User from {user} accessed {name}."},
+            { "logActionWithResult", "User from {user} accessed {name} with result: {result}."},
+            { "logActionWithNotFound", "User or scanner from {user} accessed {name}, and system returned 404 because the path does not exist."},
+            { "logActionWithException", "User from {user} accessed {name} and system throwed exception: {exception}"},
+            { "logActionBlocked", "User from {user} accessed {name}, but was blocked because: {reason}. Details: {details}."},
+            { "pathAuthError", "[Unauthorized or not-existed access target. Possibly an injecting attack.]"}
         };
         #endregion
         public enum Language
@@ -108,6 +138,17 @@
                     return "Unsupported Language Text";
             }
         }
+
+        public string FetchString(string StringName, Dictionary<string,string> ReplaceDic)
+        {
+            string result = FetchString(StringName);
+            foreach (var item in ReplaceDic)
+            {
+                result = result.Replace(item.Key, item.Value);
+            }
+            return result;
+        }
+
         public static List<string> FetchAllTexts(string StringName)
         {
             List<string> result = new List<string>();

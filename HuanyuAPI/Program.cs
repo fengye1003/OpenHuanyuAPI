@@ -1,4 +1,5 @@
 using HuanyuAPI.Essencial_Repos;
+using Microsoft.AspNetCore.HttpOverrides;
 using System.Collections;
 
 namespace HuanyuAPI
@@ -8,7 +9,10 @@ namespace HuanyuAPI
         static bool DoLogCleanUp;
         static bool EnableLogs;
         static bool EnableLogsWriting;
+        static bool EnableXReserveProxy;
         static int MaxLogEntries;
+        static string IP = "*";
+        const string DEFAULT_IP = "*";
         static int Port;
         const int DEFAULT_PORT = 5000;
         static string languageStr = "unknown";
@@ -24,7 +28,9 @@ namespace HuanyuAPI
             { "maxLogEntries", "0"},
             { "autoBuild", "false"},
             { "port", "0"},
-            { "resetAppOnBoot", "true"}
+            { "resetAppOnBoot", "true"},
+            { "ipRestrict", "*"},
+            { "enableXReserveProxy", "false" }
         };
         public static void Main(string[] args)
         {
@@ -107,6 +113,19 @@ namespace HuanyuAPI
                     bool setflag = false;
                     while (!setflag)
                     {
+                        Console.Write(l.FetchString("inputIpRestrict"));
+                        string? result = Console.ReadLine();
+                        if (result == null || result == "") 
+                        {
+                            result = "*";
+                        }
+                        IP = result!;
+                        Config["ipRestrict"] = result;
+                        setflag = true;
+                    }
+                    setflag = false;
+                    while (!setflag)
+                    {
                         Console.Write(l.FetchString("inputPortNum"));
                         string? result = Console.ReadLine();
                         try
@@ -126,6 +145,27 @@ namespace HuanyuAPI
                             // throw;
                         }
                     }
+
+                    setflag = false;
+                    while (!setflag)
+                    {
+                        Console.Write(l.FetchString("inputEnableXReserveProxy"));
+                        string? result = Console.ReadLine();
+                        if (result == "1")
+                        {
+                            Config["enableXReserveProxy"] = "true";
+                            EnableXReserveProxy = true;
+                            setflag = true;
+                        }
+                        else if (result == "0")
+                        {
+                            Config["enableXReserveProxy"] = "false";
+                            EnableXReserveProxy = false;
+                            setflag = true;
+                        }
+                        else Console.WriteLine(l.FetchString("inputError"));
+                    }
+
                     setflag = false;
                     while (!setflag)
                     {
@@ -145,6 +185,7 @@ namespace HuanyuAPI
                         }
                         else Console.WriteLine(l.FetchString("inputError"));
                     }
+                    
                     setflag = false;
                     if (EnableLogs)
                     {
@@ -206,6 +247,7 @@ namespace HuanyuAPI
             Log.EnableLogs = EnableLogs;
             EnableLogsWriting = (string)Config["enableLogsWriting"]! == "true";
             Log.EnableWriting = EnableLogsWriting;
+            IP = (string)Config["ipRestrict"]!;
 
             try
             {
@@ -244,7 +286,7 @@ namespace HuanyuAPI
                 Log.DoLogCleanUp(MaxLogEntries!);
             }
             int port = Port;
-            string[] PortArg = new string[] { "--urls", "http://*:" + port };
+            string[] PortArg = new string[] { "--urls", $"http://{IP}:" + port };
 
             var builder = WebApplication.CreateBuilder(PortArg);
 
@@ -254,7 +296,50 @@ namespace HuanyuAPI
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            if (EnableXReserveProxy)
+            {
+                builder.Services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders =
+                        ForwardedHeaders.XForwardedFor |
+                        ForwardedHeaders.XForwardedProto;
+
+                    options.KnownProxies.Add(System.Net.IPAddress.Parse("127.0.0.1"));
+                });
+            }
+            
+
             var app = builder.Build();
+
+            if (EnableXReserveProxy)
+            {
+                app.UseForwardedHeaders();
+            }
+
+            app.MapFallback(async context =>
+            {
+                context.Response.StatusCode = 404;
+
+                if (context.Request.Headers["Accept"].ToString().Contains("text/html"))
+                {
+                    context.Response.ContentType = "text/html";
+                    await context.Response.WriteAsync(
+                        "<script src=\"/_framework/aspnetcore-browser-refresh.js\"></script>" +
+                        "<div style=\"text-align: center; border: 1px solid #ccc;\"><h1>404 Not Found</h1></div>\n" +
+                        "<div style=\"text-align: center; border: 1px solid #ccc;\">Huanyu API System</div>"
+                        );
+                }
+                else
+                {
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync("{\"code\":404}");
+                }
+                Log.SaveLog(l.FetchString("logActionWithNotFound", new Dictionary<string, string>
+                {
+                    { "{user}", Common.GetClientIp(context) },
+                    { "{name}", context.Request.Path }
+                }));
+            });
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -271,5 +356,6 @@ namespace HuanyuAPI
 
             app.Run();
         }
+
     }
 }
