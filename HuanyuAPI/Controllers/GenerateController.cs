@@ -24,7 +24,7 @@ namespace HuanyuAPI.Controllers
 
             var payload = new Dictionary<string, object>
             {
-                ["model"] = "doubao-seedream-5-0-260128",
+                ["model"] = "doubao-seedream-4-5-251128",
                 ["prompt"] = prompts,
                 ["sequential_image_generation"] = "disabled",
                 ["response_format"] = "url",
