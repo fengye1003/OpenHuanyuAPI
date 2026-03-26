@@ -1,10 +1,12 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
+using PlaysisServer.Essencial_Repos;
 
 namespace PlaysisServer
 {
     internal class Program
     {
+        static List<NetPeer> ConnectedPeers = new();
         sealed class AppInfo
         {
             public const string serverVersion = "v.1.0.0.0";
@@ -19,19 +21,27 @@ namespace PlaysisServer
             SpawnModel,
             SyncRoomState,
             Auth,
-            ApiAvailabilityAuth
+            ApiAvailabilityAuth,
+            FetchModelUpload
         }
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            Log.SaveLog("欢迎使用ImgHorizon.Playsis服务端。");
             var listener = new EventBasedNetListener();
             var server = new NetManager(listener);
             server.Start(1270);
+            Log.SaveLog("网络服务端已在1270端口上开启。");
 
             listener.ConnectionRequestEvent += request =>
             {
-                request.AcceptIfKey("TekoDotIO.ImgHorizon.Playsis.ProtocolType");
+                var peer = request.AcceptIfKey("TekoDotIO.ImgHorizon.Playsis.ProtocolType");
+                Log.SaveLog($"有新的客户端{peer.Address}:{peer.Port}传入连接！");
+                if (peer != null)
+                {
+                    ConnectedPeers.Add(peer);
+                    Log.SaveLog($"已为新的连入客户端{peer.Address}:{peer.Port}注册到库。");
+                }
             };
 
             listener.NetworkReceiveEvent += ((peer, reader, channel, deliveryMethod) =>
