@@ -69,33 +69,33 @@ namespace HuanyuAPI.Controllers
                 {
                     Directory.CreateDirectory("./PlaysisUsers/");
                 }
-                if (!Directory.Exists("./PlayersisUsers/UID/" + uid + "/"))
+                if (!Directory.Exists("./PlaysisUsers/UID/" + uid + "/"))
                 {
                     Log.SaveLog(l.FetchString("logActionBlocked", new Dictionary<string, string>
                     {
                         { "{user}", ip },
                         { "{name}",  route },
-                        { "{reason}", $"False UID. PwHash: {passwordHash}; uid :{uid}" }
+                        { "{details}", $"False UID. PwHash: {passwordHash}; uid :{uid}" }
                     }));
                     return BadRequest("NotFoundUID");
                 }
                 else
                 {
-                    if (System.IO.File.ReadAllText("./PlayersisUsers/UID/" + uid + "/passwordhash.txt") != passwordHash)
+                    if (System.IO.File.ReadAllText("./PlaysisUsers/UID/" + uid + "/passwordhash.txt") != passwordHash)
                     {
                         Log.SaveLog(l.FetchString("logActionBlocked", new Dictionary<string, string>
                         {
                             { "{user}", ip },
                             { "{name}",  route },
-                            { "{reason}", $"False password: {passwordHash}; uid :{uid}" }
+                            { "{details}", $"False password: {passwordHash}; uid :{uid}" }
                         }));
                         return BadRequest("InvalidPasswordHash");
                     }
                     else
                     {
-                        if (!System.IO.File.Exists("./PlayersisUsers/UID/" + uid + "/secret.txt"))
+                        if (!System.IO.File.Exists("./PlaysisUsers/UID/" + uid + "/secret.txt"))
                         {
-                            System.IO.File.Create("./PlayersisUsers/UID/" + uid + "/secret.txt");
+                            System.IO.File.Create("./PlaysisUsers/UID/" + uid + "/secret.txt").Close();
                         }
                         var secret = GenerateSecret(16);
                         if (LoggedInUsers.TryGetValue(uid, out string? _))
@@ -103,7 +103,7 @@ namespace HuanyuAPI.Controllers
                             LoggedInUsers.Remove(uid);
                         }
                         LoggedInUsers.Add(uid, secret);
-                        System.IO.File.WriteAllText("./PlayersisUsers/UID/" + uid + "/secret.txt", secret);
+                        System.IO.File.WriteAllText("./PlaysisUsers/UID/" + uid + "/secret.txt", secret);
 
                         Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
                         {
@@ -176,22 +176,22 @@ namespace HuanyuAPI.Controllers
             string ip = Common.GetClientIp(HttpContext);
             try
             {
-                if (IsAdmin(uid) && IsValidSecretMethod(uid, secret))
+                if (IsAdminMethod(uid) && IsValidSecretMethod(uid, secret))
                 {
-                    if (!Directory.Exists("./PlayersisUsers/UID/" + regUID + "/"))
+                    if (!Directory.Exists("./PlaysisUsers/UID/" + regUID + "/"))
                     {
-                        Directory.CreateDirectory("./PlayersisUsers/UID/" + regUID + "/");
+                        Directory.CreateDirectory("./PlaysisUsers/UID/" + regUID + "/");
                     }
-                    if (!System.IO.File.Exists("./PlayersisUsers/UID/" + regUID + "/passwordhash.txt"))
+                    if (!System.IO.File.Exists("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt"))
                     {
-                        System.IO.File.Create("./PlayersisUsers/UID/" + regUID + "/passwordhash.txt");
+                        System.IO.File.Create("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt").Close();
                     }
-                    if (!System.IO.File.Exists("./PlayersisUsers/UID/" + regUID + "/username.txt"))
+                    if (!System.IO.File.Exists("./PlaysisUsers/UID/" + regUID + "/username.txt"))
                     {
-                        System.IO.File.Create("./PlayersisUsers/UID/" + regUID + "/username.txt");
+                        System.IO.File.Create("./PlaysisUsers/UID/" + regUID + "/username.txt").Close();
                     }
-                    System.IO.File.WriteAllText("./PlayersisUsers/UID/" + regUID + "/passwordhash.txt", regPasswordHash);
-                    System.IO.File.WriteAllText("./PlayersisUsers/UID/" + regUID + "/username.txt", regUsername);
+                    System.IO.File.WriteAllText("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt", regPasswordHash);
+                    System.IO.File.WriteAllText("./PlaysisUsers/UID/" + regUID + "/username.txt", regUsername);
                     Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
                     {
                         { "{user}", ip },
@@ -202,11 +202,11 @@ namespace HuanyuAPI.Controllers
                 }
                 else
                 {
-                    Log.SaveLog(l.FetchString("logActionWithBlocked", new Dictionary<string, string>
+                    Log.SaveLog(l.FetchString("logActionBlocked", new Dictionary<string, string>
                     {
                         { "{user}", ip },
                         { "{name}",  route },
-                        { "{reason}", $"uid:{uid}; secret:{secret}. Failed." }
+                        { "{details}", $"uid:{uid}; secret:{secret}. Failed." }
                     }));
                     return "InvalidOperation";
                 }
@@ -232,7 +232,7 @@ namespace HuanyuAPI.Controllers
             {
                 if (IsValidSecretMethod(uid, secret))
                 {
-                    System.IO.File.WriteAllText("./PlayersisUsers/UID/" + uid + "/username.txt", newUsername);
+                    System.IO.File.WriteAllText("./PlaysisUsers/UID/" + uid + "/username.txt", newUsername);
                     Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
                     {
                         { "{user}", ip },
@@ -243,11 +243,11 @@ namespace HuanyuAPI.Controllers
                 }
                 else
                 {
-                    Log.SaveLog(l.FetchString("logActionWithBlocked", new Dictionary<string, string>
+                    Log.SaveLog(l.FetchString("logActionBlocked", new Dictionary<string, string>
                     {
                         { "{user}", ip },
                         { "{name}",  route },
-                        { "{reason}", $"uid:{uid}; secret:{secret}. Failed." }
+                        { "{details}", $"uid:{uid}; secret:{secret}. Failed." }
                     }));
                     return "InvalidOperation";
                 }
@@ -271,7 +271,7 @@ namespace HuanyuAPI.Controllers
             string ip = Common.GetClientIp(HttpContext);
             try
             {
-                var result = System.IO.File.ReadAllText("./PlayersisUsers/UID/" + uid + "/username.txt");
+                var result = System.IO.File.ReadAllText("./PlaysisUsers/UID/" + uid + "/username.txt");
                 Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
                 {
                     { "{user}", ip },
@@ -294,6 +294,47 @@ namespace HuanyuAPI.Controllers
         }
 
         [HttpGet]
+        public ActionResult<string> IsAdmin(string uid)
+        {
+            string route = "PlaysisServiceController.IsAdmin";
+            string ip = Common.GetClientIp(HttpContext);
+            try
+            {
+                CreateInstanceIfBoot();
+                if (IsAdminMethod(uid))
+                {
+                    Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
+                    {
+                        { "{user}", ip },
+                        { "{name}",  route },
+                        { "{result}", $"uid:{uid}. Success." }
+                    }));
+                    return "1";
+                }
+                else
+                {
+                    Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
+                    {
+                        { "{user}", ip },
+                        { "{name}",  route },
+                        { "{result}", $"uid:{uid}. Failed." }
+                    }));
+                    return "0";
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.SaveLog(l.FetchString("logActionWithException", new Dictionary<string, string>
+                    {
+                        { "{user}", ip },
+                        { "{name}",  route },
+                        { "{exception}", $"uid :{uid}. Ex: {ex}" }
+                    }));
+                return "InternalError";
+            }
+        }
+
+        [HttpGet]
         public ActionResult<string> Status()
         {
             string route = "PlaysisServiceController.Status";
@@ -309,9 +350,9 @@ namespace HuanyuAPI.Controllers
             return result;
         }
 
-        static bool IsAdmin(string uid)
+        static bool IsAdminMethod(string uid)
         {
-            if (System.IO.File.Exists("./PlayersisUsers/UID/" + uid + "/.admin"))
+            if (System.IO.File.Exists("./PlaysisUsers/UID/" + uid + "/.admin"))
             {
                 return true;
             }
