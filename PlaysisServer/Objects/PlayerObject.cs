@@ -16,9 +16,11 @@ namespace PlaysisServer.Objects
         public string Name;
         public string ConnectSecret;
 
-        public PlayerObject()
+        public PlayerObject(int uid, string name, string secret)
         {
-
+            UID = uid;
+            Name = name;
+            ConnectSecret = secret;
         }
 
 

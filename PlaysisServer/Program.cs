@@ -1,33 +1,34 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
 using PlaysisServer.Essencial_Repos;
+using System.Collections;
+using PlaysisServer.PacketModels;
 
 namespace PlaysisServer
 {
     internal class Program
     {
-        static List<NetPeer> ConnectedPeers = new();
-        sealed class AppInfo
+        const string ConfigPath = "./Properties/ServerConfig.properties";
+        static Hashtable htStandard = new()
+        {
+            { "type", "Playsis.ServerConfig" },
+            { "huanyuApiHost", "0.0.0.0:1270" },
+        };
+        public static Hashtable Config = new();
+        public static List<NetPeer> ConnectedPeers = new();
+        public static Dictionary<NetPeer, Dictionary<string, object>> LoggedInUsers = new();
+        public class AppInfo
         {
             public const string serverVersion = "v.1.0.0.0";
             public const string availableClientVersion = "v.1.0.0.0";
             public const int protocolLevel = 0;
         }
-        enum OpCode : byte
-        {
-            JoinRoom = 1,
-            PlayerSpawn,
-            PlayerMove,
-            SpawnModel,
-            SyncRoomState,
-            Auth,
-            ApiAvailabilityAuth,
-            FetchModelUpload
-        }
+        
 
         static void Main(string[] args)
         {
             Log.SaveLog("欢迎使用ImgHorizon.Playsis服务端。");
+            Config = PropertiesHelper.AutoCheck(htStandard, ConfigPath);
             var listener = new EventBasedNetListener();
             var server = new NetManager(listener);
             server.Start(1270);
@@ -46,31 +47,28 @@ namespace PlaysisServer
 
             listener.NetworkReceiveEvent += ((peer, reader, channel, deliveryMethod) =>
             {
-                var op = (OpCode)reader.GetByte();
+                var op = (CommonObjects.OpCode)reader.GetByte();
 
                 switch (op)
                 {
-                    case OpCode.ApiAvailabilityAuth:
-                        ApiAvailabilityAuth(peer, reader);
+                    case CommonObjects.OpCode.ApiAvailabilityAuth:
+
+                        peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableUnordered, null);
+                        break;
+                    case CommonObjects.OpCode.Auth:
+                        peer.SendWithDeliveryEvent(Models.Auth(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        break;
+                    case CommonObjects.OpCode.PlayerSpawn:
+                        peer.SendWithDeliveryEvent(Models.PlayerSpawn(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        break;
+                    case CommonObjects.OpCode.PlayerMove:
                         break;
                 }
 
                 reader.Recycle();
             });
 
-            static void ApiAvailabilityAuth(NetPeer peer, NetPacketReader reader)
-            {
-                var writer = new NetDataWriter();
-                var ver = reader.GetInt();
-                if (ver != AppInfo.protocolLevel)
-                {
-                    writer.Put(0);
-                }
-                else
-                {
-                    writer.Put(1);
-                }
-            }
+            
 
         }
 
