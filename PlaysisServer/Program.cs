@@ -58,6 +58,7 @@ namespace PlaysisServer
                     case CommonObjects.OpCode.ApiAvailabilityAuth:
 
                         peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableUnordered, null);
+                        Log.SaveLog("Sent");
                         break;
                     case CommonObjects.OpCode.Auth:
                         peer.SendWithDeliveryEvent(Models.Auth(peer, reader), DeliveryMethod.ReliableOrdered, null);
@@ -80,7 +81,11 @@ namespace PlaysisServer
 
             };
 
-            
+            while (true)
+            {
+                server.PollEvents();
+                Thread.Sleep(15);
+            }
 
         }
 

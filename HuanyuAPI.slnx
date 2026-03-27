@@ -1,4 +1,5 @@
 <Solution>
   <Project Path="HuanyuAPI/HuanyuAPI.csproj" />
+  <Project Path="HuanyuDemoTests/HuanyuDemoTests.csproj" Id="bd9b4e46-5ac4-4341-9ae3-9e79cb213e2f" />
   <Project Path="PlaysisServer/PlaysisServer.csproj" Id="6fdcf089-04e5-457f-8999-9f6bcdbf401a" />
 </Solution>
