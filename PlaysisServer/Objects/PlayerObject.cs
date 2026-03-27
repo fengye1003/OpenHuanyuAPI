@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiteNetLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -15,6 +16,24 @@ namespace PlaysisServer.Objects
         public readonly int UID;
         public string Name;
         public string ConnectSecret;
+        public NetPeer UserNetPeer;
+        public PlaysisRoom Room
+        {
+            set
+            {
+                if (Room != null)
+                {
+                    Room.ExitRoom(this);
+                }
+                value.JoinRoom(this);
+                Room = value;
+                
+            }
+            get
+            {
+                return Room;
+            }
+        }
 
         public PlayerObject(int uid, string name, string secret)
         {

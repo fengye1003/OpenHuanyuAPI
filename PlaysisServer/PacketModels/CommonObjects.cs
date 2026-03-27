@@ -1,5 +1,6 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
+using PlaysisServer.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,10 @@ namespace PlaysisServer.PacketModels
             writer.Put(value.X);
             writer.Put(value.Y);
             writer.Put(value.Z);
+        }
+        public void BroadcastPacket(NetDataWriter writer, List<PlayerObject> targets)
+        {
+
         }
     }
 }

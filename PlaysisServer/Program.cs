@@ -3,6 +3,7 @@ using LiteNetLib.Utils;
 using PlaysisServer.Essencial_Repos;
 using System.Collections;
 using PlaysisServer.PacketModels;
+using PlaysisServer.Objects;
 
 namespace PlaysisServer
 {
@@ -12,10 +13,12 @@ namespace PlaysisServer
         static Hashtable htStandard = new()
         {
             { "type", "Playsis.ServerConfig" },
-            { "huanyuApiHost", "0.0.0.0:1270" },
+            { "huanyuApiHost", "0.0.0.0:5003" },
         };
         public static Hashtable Config = new();
         public static List<NetPeer> ConnectedPeers = new();
+        public static List<PlaysisRoom> Rooms = new();
+        public static PlaysisRoom PublicHall = new(0, "Public Hall");
         public static Dictionary<NetPeer, Dictionary<string, object>> LoggedInUsers = new();
         public class AppInfo
         {
@@ -32,6 +35,7 @@ namespace PlaysisServer
             var listener = new EventBasedNetListener();
             var server = new NetManager(listener);
             server.Start(1270);
+            Rooms.Add(PublicHall);
             Log.SaveLog("网络服务端已在1270端口上开启。");
 
             listener.ConnectionRequestEvent += request =>
@@ -64,9 +68,17 @@ namespace PlaysisServer
                     case CommonObjects.OpCode.PlayerMove:
                         break;
                 }
-
+                if (!ConnectedPeers.Contains(peer))
+                {
+                    peer.Disconnect();
+                }
                 reader.Recycle();
             });
+
+            listener.PeerDisconnectedEvent += (peer, disconnectInfo) =>
+            {
+
+            };
 
             
 
