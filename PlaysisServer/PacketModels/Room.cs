@@ -30,8 +30,12 @@ namespace PlaysisServer.PacketModels
             }
 
             var players = ((PlayerObject)userInfo["playerObj"]).Room.Players;
-
-
+            foreach (var player in players)
+            {
+                CommonObjects.PlacePlayerPacket(writer, player);
+            }
+            CommonObjects.PlaceEOFPacket(writer);
+            return(writer);
         }
 
         

@@ -106,6 +106,15 @@ namespace PlaysisServer
                         }
                         break;
                     case CommonObjects.OpCode.SyncRoomState:
+                        try
+                        {
+                            peer.SendWithDeliveryEvent(Models.PlayerMove(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SaveLog(ex.ToString());
+                            //throw;
+                        }
                         break;
                 }
                 if (!ConnectedPeers.Contains(peer))

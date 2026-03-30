@@ -66,5 +66,10 @@ namespace PlaysisServer.PacketModels
             result.Rotation = CommonObjects.GetVector3(reader);
             return result;
         }
+
+        public static void PlaceEOFPacket(NetDataWriter writer)
+        {
+            writer.Put((byte)PacketInternalSymbols.EOF);
+        }
     }
 }

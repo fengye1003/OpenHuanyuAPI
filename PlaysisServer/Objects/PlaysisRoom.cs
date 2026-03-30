@@ -13,7 +13,7 @@ namespace PlaysisServer.Objects
         public PlayerObject? Owner;
         public List<PlayerObject> Players = new();
 
-        public PlaysisRoom(int roomId, string name, PlayerObject owner)
+        public PlaysisRoom(int roomId, string name, PlayerObject? owner)
         {
             RoomID = roomId;
             Name = name;
