@@ -55,6 +55,9 @@ namespace PlaysisServer.PacketModels
             writer.Put((byte)PacketInternalSymbols.PlayerPacket);
             writer.Put(player.UID);
             CommonObjects.PutVector3(writer, player.Location);
+            //Console.WriteLine(player.Location.X);
+            //Console.WriteLine(player.Location.Y);
+            //Console.WriteLine(player.Location.Z);
             CommonObjects.PutVector3(writer, player.Scale);
             CommonObjects.PutVector3(writer, player.Rotation);
         }

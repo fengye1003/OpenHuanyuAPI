@@ -36,7 +36,7 @@ namespace PlaysisServer.PacketModels
                 CommonObjects.PlacePlayerPacket(writer, player);
             }
             CommonObjects.PlaceEOFPacket(writer);
-            Log.SaveLog($"已发送包，共{players.Count}玩家");
+            //Log.SaveLog($"已发送包，共{players.Count}玩家");
             return(writer);
         }
 

@@ -34,9 +34,9 @@ namespace PlaysisServer.PacketModels
                 return writer;
             }
             
-            Vector3 location = new(0, 0, 0.7f);
+            Vector3 location = CommonObjects.GetVector3(reader);
             Vector3 scale = CommonObjects.GetVector3(reader);
-            Vector3 rotation = new Vector3(0, 0, 0);
+            Vector3 rotation = CommonObjects.GetVector3(reader);
             HttpClient client = new HttpClient();
             var result = client.GetStringAsync((string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/GetUsername?uid={uid}");
 
@@ -90,7 +90,7 @@ namespace PlaysisServer.PacketModels
 
             Vector3 location = CommonObjects.GetVector3(reader);
             Vector3 rotation = CommonObjects.GetVector3(reader);
-
+            //Log.SaveLog($"{location.X} {location.Y} {location.Z} ");
             
             if (Program.LoggedInUsers[peer].TryGetValue("playerObj", out object? value))
             {

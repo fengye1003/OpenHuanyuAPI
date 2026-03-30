@@ -25,7 +25,7 @@ namespace PlaysisServer
         {
             public const string serverVersion = "v.1.0.0.0";
             public const string availableClientVersion = "v.1.0.0.0";
-            public const int protocolLevel = 1;
+            public const int protocolLevel = 2;
         }
         
 
@@ -57,7 +57,7 @@ namespace PlaysisServer
             listener.NetworkReceiveEvent += ((peer, reader, channel, deliveryMethod) =>
             {
                 var op = (CommonObjects.OpCode)reader.GetByte();
-
+                //Log.SaveLog(((int)op).ToString());
                 switch (op)
                 {
                     case CommonObjects.OpCode.ApiAvailabilityAuth:
