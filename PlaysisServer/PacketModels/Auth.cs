@@ -14,10 +14,12 @@ namespace PlaysisServer.PacketModels
         {
             var writer = new NetDataWriter();
             var uid = reader.GetInt();
-            var passwordhash = reader.GetLargeString();
+            var passwordhash = reader.GetString();
             HttpClient client = new();
-            var resultTask = client.GetStringAsync((string)Program.Config["huanyuApiHost"]!+$"/PlaysisService/Login?uid={uid}&passwordhash={passwordhash}");
-            string result = resultTask.Result;
+            var url = (string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/Login?uid={uid}&passwordhash={passwordhash}";
+            var response = client.GetAsync(url);
+            var content = response.Result.Content.ReadAsStringAsync();
+            string result = content.Result;
             if (result == "NotFoundUID" || result == "InvalidPasswordHash")
             {
                 writer.Put(0);

@@ -13,7 +13,7 @@ namespace PlaysisServer.PacketModels
     {
         public static NetDataWriter ApiAvailabilityAuth(NetPeer peer, NetPacketReader reader)
         {
-            Log.SaveLog("Received");
+            //Log.SaveLog("Received");
             var writer = new NetDataWriter();
             var ver = reader.GetInt();
             if (ver != Program.AppInfo.protocolLevel)

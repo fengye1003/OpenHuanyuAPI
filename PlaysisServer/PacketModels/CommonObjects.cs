@@ -23,6 +23,15 @@ namespace PlaysisServer.PacketModels
             ApiAvailabilityAuth,
             FetchModelUpload
         }
+
+        public enum PacketInternalSymbols : byte
+        {
+            EOF,
+            PlayerPacket,
+            ModelPacket,
+            NoticePacket
+        }
+
         public static Vector3 GetVector3(NetPacketReader reader)
         {
             var x = reader.GetFloat();
@@ -36,9 +45,26 @@ namespace PlaysisServer.PacketModels
             writer.Put(value.Y);
             writer.Put(value.Z);
         }
-        public void BroadcastPacket(NetDataWriter writer, List<PlayerObject> targets)
-        {
 
+        public static void PlacePlayerPacket(NetDataWriter writer, PlayerObject player)
+        {
+            writer.Put((byte)PacketInternalSymbols.PlayerPacket);
+            writer.Put(player.UID);
+            writer.Put(player.Name);
+            CommonObjects.PutVector3(writer, player.Location);
+            CommonObjects.PutVector3(writer, player.Scale);
+            CommonObjects.PutVector3(writer, player.Rotation);
+        }
+        public static PlayerObject FetchPlayerPacket(NetPacketReader reader, PlayerObject player)
+        {
+            var uid = reader.GetInt();
+            var name = reader.GetString();
+            PlayerObject result = new(uid, name, null);
+            
+            result.Location = CommonObjects.GetVector3(reader);
+            result.Scale = CommonObjects.GetVector3(reader);
+            result.Rotation = CommonObjects.GetVector3(reader);
+            return result;
         }
     }
 }

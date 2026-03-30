@@ -1,5 +1,6 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
+using PlaysisServer.Essencial_Repos;
 using PlaysisServer.Objects;
 using System;
 using System.Collections.Generic;
@@ -40,13 +41,13 @@ namespace PlaysisServer.PacketModels
             var result = client.GetStringAsync((string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/GetUsername?uid={uid}");
 
             PlayerObject player = new(uid, result.ToString()!, (string)Program.LoggedInUsers[peer]["secret"]);
-            Program.LoggedInUsers[peer].Add("playerObj", player);
+            
             player.UserNetPeer = peer;
             player.Room = Program.PublicHall;
             player.Location = location;
             player.Scale = scale;
             player.Rotation = rotation;
-
+            Program.LoggedInUsers[peer].Add("playerObj", player);
 
             NetDataWriter playerMsg = new();
             playerMsg.Put((byte)CommonObjects.OpCode.PlayerSpawn);
@@ -55,9 +56,13 @@ namespace PlaysisServer.PacketModels
             CommonObjects.PutVector3(playerMsg, scale);
             CommonObjects.PutVector3(playerMsg, rotation);
             // Broadcast Stage
+            Log.SaveLog($"Sending spawn for player {uid}");
             foreach (var target in player.Room.Players)
             {
-                target.UserNetPeer.Send(playerMsg, DeliveryMethod.ReliableOrdered);
+                if (target.UserNetPeer != peer)
+                {
+                    target.UserNetPeer!.Send(playerMsg, DeliveryMethod.ReliableOrdered);
+                }
             }
 
             writer.Put(1);
@@ -94,7 +99,7 @@ namespace PlaysisServer.PacketModels
             // Broadcast Stage
             foreach (var target in ((PlayerObject)(Program.LoggedInUsers[peer]["playerObj"])).Room.Players)
             {
-                target.UserNetPeer.Send(playerMsg, DeliveryMethod.ReliableOrdered);
+                target.UserNetPeer!.Send(playerMsg, DeliveryMethod.ReliableOrdered);
             }
 
             writer.Put(1);

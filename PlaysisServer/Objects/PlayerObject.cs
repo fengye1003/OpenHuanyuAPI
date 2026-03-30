@@ -15,27 +15,35 @@ namespace PlaysisServer.Objects
         public Vector3 Rotation;
         public readonly int UID;
         public string Name;
-        public string ConnectSecret;
-        public NetPeer UserNetPeer;
+        public string? ConnectSecret;
+        public NetPeer? UserNetPeer;
+
+
+        private PlaysisRoom? _room;
+
         public PlaysisRoom Room
         {
-            set
-            {
-                if (Room != null)
-                {
-                    Room.ExitRoom(this);
-                }
-                value.JoinRoom(this);
-                Room = value;
-                
-            }
             get
             {
-                return Room;
+                return _room!;
+            }
+            set
+            {
+                if (_room != null)
+                {
+                    _room.ExitRoom(this);
+                }
+
+                _room = value;
+
+                if (_room != null)
+                {
+                    _room.JoinRoom(this);
+                }
             }
         }
 
-        public PlayerObject(int uid, string name, string secret)
+        public PlayerObject(int uid, string name, string? secret)
         {
             UID = uid;
             Name = name;

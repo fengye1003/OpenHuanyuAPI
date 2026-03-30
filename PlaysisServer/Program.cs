@@ -1,9 +1,10 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
 using PlaysisServer.Essencial_Repos;
-using System.Collections;
-using PlaysisServer.PacketModels;
 using PlaysisServer.Objects;
+using PlaysisServer.PacketModels;
+using System.Collections;
+using System.Diagnostics;
 
 namespace PlaysisServer
 {
@@ -18,19 +19,23 @@ namespace PlaysisServer
         public static Hashtable Config = new();
         public static List<NetPeer> ConnectedPeers = new();
         public static List<PlaysisRoom> Rooms = new();
-        public static PlaysisRoom PublicHall = new(0, "Public Hall");
+        public static PlaysisRoom PublicHall = new(0, "Public Hall", null);
         public static Dictionary<NetPeer, Dictionary<string, object>> LoggedInUsers = new();
         public class AppInfo
         {
             public const string serverVersion = "v.1.0.0.0";
             public const string availableClientVersion = "v.1.0.0.0";
-            public const int protocolLevel = 0;
+            public const int protocolLevel = 1;
         }
         
 
         static void Main(string[] args)
         {
             Log.SaveLog("欢迎使用ImgHorizon.Playsis服务端。");
+            if (!Directory.Exists("./Properties/"))
+            {
+                Directory.CreateDirectory("./Properties/");
+            }
             Config = PropertiesHelper.AutoCheck(htStandard, ConfigPath);
             var listener = new EventBasedNetListener();
             var server = new NetManager(listener);
@@ -56,17 +61,51 @@ namespace PlaysisServer
                 switch (op)
                 {
                     case CommonObjects.OpCode.ApiAvailabilityAuth:
-
-                        peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableUnordered, null);
-                        Log.SaveLog("Sent");
+                        try
+                        {
+                            peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableUnordered, null);
+                            //Log.SaveLog("Sent");
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SaveLog(ex.ToString());
+                            //throw;
+                        }
                         break;
                     case CommonObjects.OpCode.Auth:
-                        peer.SendWithDeliveryEvent(Models.Auth(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        try
+                        {
+                            peer.SendWithDeliveryEvent(Models.Auth(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SaveLog(ex.ToString());
+                            //throw;
+                        }
                         break;
                     case CommonObjects.OpCode.PlayerSpawn:
-                        peer.SendWithDeliveryEvent(Models.PlayerSpawn(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        try
+                        {
+                            peer.SendWithDeliveryEvent(Models.PlayerSpawn(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SaveLog(ex.ToString());
+                            //throw;
+                        }
                         break;
                     case CommonObjects.OpCode.PlayerMove:
+                        try
+                        {
+                            peer.SendWithDeliveryEvent(Models.PlayerMove(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SaveLog(ex.ToString());
+                            //throw;
+                        }
+                        break;
+                    case CommonObjects.OpCode.SyncRoomState:
                         break;
                 }
                 if (!ConnectedPeers.Contains(peer))
@@ -78,7 +117,18 @@ namespace PlaysisServer
 
             listener.PeerDisconnectedEvent += (peer, disconnectInfo) =>
             {
-
+                try
+                {
+                    Log.SaveLog(disconnectInfo.Reason.ToString());
+                    ConnectedPeers.Remove(peer);
+                    ((PlayerObject)LoggedInUsers[peer]["playerObj"]).Room.Players.Remove((PlayerObject)LoggedInUsers[peer]["playerObj"]);
+                    
+                }
+                catch (Exception ex)
+                {
+                    Log.SaveLog(ex.ToString());
+                }
+                
             };
 
             while (true)
