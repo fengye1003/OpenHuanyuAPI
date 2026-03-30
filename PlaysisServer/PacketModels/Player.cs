@@ -90,20 +90,80 @@ namespace PlaysisServer.PacketModels
             Vector3 location = CommonObjects.GetVector3(reader);
             Vector3 rotation = CommonObjects.GetVector3(reader);
 
-            //Broadcast Stage
-            NetDataWriter playerMsg = new();
-            playerMsg.Put((byte)CommonObjects.OpCode.PlayerMove);
-            playerMsg.Put(uid);
-            CommonObjects.PutVector3(playerMsg, location);
-            CommonObjects.PutVector3(playerMsg, rotation);
-            // Broadcast Stage
-            foreach (var target in ((PlayerObject)(Program.LoggedInUsers[peer]["playerObj"])).Room.Players)
+            
+            if (Program.LoggedInUsers[peer].TryGetValue("playerObj", out object? value))
             {
-                target.UserNetPeer!.Send(playerMsg, DeliveryMethod.ReliableOrdered);
+                ((PlayerObject)value).Location = location;
+                ((PlayerObject)value).Rotation = rotation;
+                writer.Put(1);
+            }
+            else
+            {
+                writer.Put(0);
             }
 
-            writer.Put(1);
+            //this is for server-push solution
+            ////Broadcast Stage
+            //NetDataWriter playerMsg = new();
+            //playerMsg.Put((byte)CommonObjects.OpCode.PlayerMove);
+            //playerMsg.Put(uid);
+            //CommonObjects.PutVector3(playerMsg, location);
+            //CommonObjects.PutVector3(playerMsg, rotation);
+            //// Broadcast Stage
+            //foreach (var target in ((PlayerObject)(Program.LoggedInUsers[peer]["playerObj"])).Room.Players)
+            //{
+            //    target.UserNetPeer!.Send(playerMsg, DeliveryMethod.ReliableOrdered);
+            //}
+            //writer.Put(1);
+
             return writer;
+        }
+        public static NetDataWriter GetPlayerNameByUid(NetPeer peer, NetPacketReader reader)
+        {
+            var writer = new NetDataWriter();
+            //Receive Stage
+            var uid = reader.GetInt();
+            if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
+            {
+                writer.Put(0);
+                Program.ConnectedPeers.Remove(peer);
+                peer.Disconnect();
+                return writer;
+            }
+            else if ((int)userInfo["uid"] != uid)
+            {
+                writer.Put(0);
+                return writer;
+            }
+            writer.Put(1);
+
+            var queryUid = reader.GetInt();
+            if (!TryGetNameByUid(queryUid, out string? result)) 
+            {
+                writer.Put(1);
+                writer.Put(result);
+            }
+            else
+            {
+                writer.Put(0);
+            }
+            return writer;
+        }
+
+        static public bool TryGetNameByUid(int uid, out string? name)
+        {
+            foreach (var item in Program.LoggedInUsers.Values)
+            {
+                if (!item.TryGetValue("playerObj", out object? targetObj))
+                    continue;
+                if (((PlayerObject)targetObj).UID == uid)
+                {
+                    name = ((PlayerObject)targetObj).Name!;
+                    return true;
+                }
+            }
+            name = null;
+            return false;
         }
     }
 }

@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace PlaysisServer.PacketModels
 {
+    /// <summary>
+    /// version.3.30.01.net
+    /// </summary>
     internal class CommonObjects
     {
         public enum OpCode : byte
@@ -21,7 +24,8 @@ namespace PlaysisServer.PacketModels
             SyncRoomState,
             Auth,
             ApiAvailabilityAuth,
-            FetchModelUpload
+            FetchModelUpload,
+            GetPlayerNameByUid
         }
 
         public enum PacketInternalSymbols : byte
@@ -50,16 +54,14 @@ namespace PlaysisServer.PacketModels
         {
             writer.Put((byte)PacketInternalSymbols.PlayerPacket);
             writer.Put(player.UID);
-            writer.Put(player.Name);
             CommonObjects.PutVector3(writer, player.Location);
             CommonObjects.PutVector3(writer, player.Scale);
             CommonObjects.PutVector3(writer, player.Rotation);
         }
-        public static PlayerObject FetchPlayerPacket(NetPacketReader reader, PlayerObject player)
+        public static PlayerObject FetchPlayerPacket(NetPacketReader reader)
         {
             var uid = reader.GetInt();
-            var name = reader.GetString();
-            PlayerObject result = new(uid, name, null);
+            PlayerObject result = new(uid, null, null);
             
             result.Location = CommonObjects.GetVector3(reader);
             result.Scale = CommonObjects.GetVector3(reader);

@@ -14,7 +14,7 @@ namespace PlaysisServer.Objects
         public Vector3 Scale;
         public Vector3 Rotation;
         public readonly int UID;
-        public string Name;
+        public string? Name;
         public string? ConnectSecret;
         public NetPeer? UserNetPeer;
 
@@ -43,7 +43,7 @@ namespace PlaysisServer.Objects
             }
         }
 
-        public PlayerObject(int uid, string name, string? secret)
+        public PlayerObject(int uid, string? name, string? secret)
         {
             UID = uid;
             Name = name;

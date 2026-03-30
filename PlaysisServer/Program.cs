@@ -116,6 +116,17 @@ namespace PlaysisServer
                             //throw;
                         }
                         break;
+                    case CommonObjects.OpCode.GetPlayerNameByUid:
+                        try
+                        {
+                            peer.SendWithDeliveryEvent(Models.GetPlayerNameByUid(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SaveLog(ex.ToString());
+                            //throw;
+                        }
+                        break;
                 }
                 if (!ConnectedPeers.Contains(peer))
                 {
