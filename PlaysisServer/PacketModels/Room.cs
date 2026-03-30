@@ -28,7 +28,7 @@ namespace PlaysisServer.PacketModels
                 writer.Put(0);
                 return writer;
             }
-
+            writer.Put(1);
             var players = ((PlayerObject)userInfo["playerObj"]).Room.Players;
             foreach (var player in players)
             {
