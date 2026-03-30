@@ -108,7 +108,7 @@ namespace PlaysisServer
                     case CommonObjects.OpCode.SyncRoomState:
                         try
                         {
-                            peer.SendWithDeliveryEvent(Models.PlayerMove(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            peer.SendWithDeliveryEvent(Models.SyncRoomStatus(peer, reader), DeliveryMethod.ReliableOrdered, null);
                         }
                         catch (Exception ex)
                         {

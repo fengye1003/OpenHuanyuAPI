@@ -66,6 +66,7 @@ namespace PlaysisServer.PacketModels
             }
 
             writer.Put(1);
+            Log.SaveLog("已回调。");
             return writer;
         }
 
@@ -140,6 +141,7 @@ namespace PlaysisServer.PacketModels
             var queryUid = reader.GetInt();
             if (!TryGetNameByUid(queryUid, out string? result)) 
             {
+                writer.Put(uid);
                 writer.Put(1);
                 writer.Put(result);
             }

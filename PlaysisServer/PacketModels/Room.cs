@@ -1,5 +1,6 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
+using PlaysisServer.Essencial_Repos;
 using PlaysisServer.Objects;
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,7 @@ namespace PlaysisServer.PacketModels
                 CommonObjects.PlacePlayerPacket(writer, player);
             }
             CommonObjects.PlaceEOFPacket(writer);
+            Log.SaveLog($"已发送包，共{players.Count}玩家");
             return(writer);
         }
 
