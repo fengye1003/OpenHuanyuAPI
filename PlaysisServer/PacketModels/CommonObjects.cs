@@ -26,7 +26,8 @@ namespace PlaysisServer.PacketModels
             ApiAvailabilityAuth,
             FetchModelUpload,
             GetPlayerNameByUid,
-            RequestUploadModel
+            RequestUploadModel,
+            AddModelUrl
         }
 
         public enum PacketInternalSymbols : byte
