@@ -10,7 +10,9 @@
   <ItemGroup>
     <PackageReference Include="LiteNetLib" Version="2.1.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Tencent.QCloud.Cos.Sdk" Version="5.4.51" />
     <PackageReference Include="Tencent.QCloud.Cos.Sts.Sdk" Version="3.0.5" />
+    <PackageReference Include="TencentCloudSDK" Version="3.0.500" />
   </ItemGroup>
 
 </Project>

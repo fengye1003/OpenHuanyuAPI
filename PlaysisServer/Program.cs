@@ -15,6 +15,13 @@ namespace PlaysisServer
         {
             { "type", "Playsis.ServerConfig" },
             { "huanyuApiHost", "0.0.0.0:5003" },
+            { "tencentApiSecretId", "null" },
+            { "tencentApiSecretKey", "null" },
+            { "bucket", "null" },
+            { "appId", "null" },
+            { "region", "null" },
+            { "expireTime", "1800" },
+            { "limitUploadMB", "20" }
         };
         public static Hashtable Config = new();
         public static List<NetPeer> ConnectedPeers = new();
@@ -25,7 +32,7 @@ namespace PlaysisServer
         {
             public const string serverVersion = "v.1.0.0.0";
             public const string availableClientVersion = "v.1.0.0.0";
-            public const int protocolLevel = 2;
+            public const int protocolLevel = 3;
         }
         
 
@@ -39,6 +46,7 @@ namespace PlaysisServer
             Config = PropertiesHelper.AutoCheck(htStandard, ConfigPath);
             var listener = new EventBasedNetListener();
             var server = new NetManager(listener);
+            server.ChannelsCount = 3;
             server.Start(1270);
             Rooms.Add(PublicHall);
             Log.SaveLog("网络服务端已在1270端口上开启。");
@@ -56,81 +64,115 @@ namespace PlaysisServer
 
             listener.NetworkReceiveEvent += ((peer, reader, channel, deliveryMethod) =>
             {
-                var op = (CommonObjects.OpCode)reader.GetByte();
-                //Log.SaveLog(((int)op).ToString());
-                switch (op)
+                if (channel == (byte)2)
                 {
-                    case CommonObjects.OpCode.ApiAvailabilityAuth:
+                    Log.SaveLog("channel 2.");
+                    var op = (CommonObjects.OpCode)reader.GetByte();
+                    if (op == CommonObjects.OpCode.RequestUploadModel)
+                    {
                         try
                         {
-                            peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableUnordered, null);
-                            //Log.SaveLog("Sent");
+                            peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader), 2 , DeliveryMethod.ReliableOrdered, null);
                         }
                         catch (Exception ex)
                         {
                             Log.SaveLog(ex.ToString());
                             //throw;
                         }
-                        break;
-                    case CommonObjects.OpCode.Auth:
-                        try
-                        {
-                            peer.SendWithDeliveryEvent(Models.Auth(peer, reader), DeliveryMethod.ReliableOrdered, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SaveLog(ex.ToString());
-                            //throw;
-                        }
-                        break;
-                    case CommonObjects.OpCode.PlayerSpawn:
-                        try
-                        {
-                            peer.SendWithDeliveryEvent(Models.PlayerSpawn(peer, reader), DeliveryMethod.ReliableOrdered, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SaveLog(ex.ToString());
-                            //throw;
-                        }
-                        break;
-                    case CommonObjects.OpCode.PlayerMove:
-                        try
-                        {
-                            peer.SendWithDeliveryEvent(Models.PlayerMove(peer, reader), DeliveryMethod.ReliableOrdered, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SaveLog(ex.ToString());
-                            //throw;
-                        }
-                        break;
-                    case CommonObjects.OpCode.SyncRoomState:
-                        try
-                        {
-                            peer.SendWithDeliveryEvent(Models.SyncRoomStatus(peer, reader), DeliveryMethod.ReliableOrdered, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SaveLog(ex.ToString());
-                            //throw;
-                        }
-                        break;
-                    case CommonObjects.OpCode.GetPlayerNameByUid:
-                        try
-                        {
-                            peer.SendWithDeliveryEvent(Models.GetPlayerNameByUid(peer, reader), DeliveryMethod.ReliableOrdered, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SaveLog(ex.ToString());
-                            //throw;
-                        }
-                        break;
+                    }
                 }
-                if (!ConnectedPeers.Contains(peer))
+                else
                 {
-                    peer.Disconnect();
+                    var op = (CommonObjects.OpCode)reader.GetByte();
+                    if (op != CommonObjects.OpCode.SyncRoomState && op != CommonObjects.OpCode.PlayerMove) Console.WriteLine((int)op);
+                    //Log.SaveLog(((int)op).ToString());
+                    switch (op)
+                    {
+                        case CommonObjects.OpCode.ApiAvailabilityAuth:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableUnordered, null);
+                                //Log.SaveLog("Sent");
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.Auth:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.Auth(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.PlayerSpawn:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.PlayerSpawn(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.PlayerMove:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.PlayerMove(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.SyncRoomState:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.SyncRoomStatus(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.GetPlayerNameByUid:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.GetPlayerNameByUid(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.RequestUploadModel:
+                            try
+                            {
+                               // Log.SaveLog("111");
+                                peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                    }
+                    if (!ConnectedPeers.Contains(peer))
+                    {
+                        peer.Disconnect();
+                    }
+                    
                 }
                 reader.Recycle();
             });
