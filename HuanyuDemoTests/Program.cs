@@ -215,10 +215,10 @@ namespace HuanyuDemoTests
             PlayerSpawn,
             PlayerMove,
             SpawnModel,
-            SyncRoomState,
+            SyncRoomPlayerState,
             Auth,
             ApiAvailabilityAuth,
-            FetchModelUpload
+            FetchModelInfo
         }
 
         public static Vector3 GetVector3(NetPacketReader reader)

@@ -84,7 +84,7 @@ namespace PlaysisServer
                 else
                 {
                     var op = (CommonObjects.OpCode)reader.GetByte();
-                    //if (op != CommonObjects.OpCode.SyncRoomState && op != CommonObjects.OpCode.PlayerMove) Console.WriteLine((int)op);
+                    //if (op != CommonObjects.OpCode.SyncRoomPlayerState && op != CommonObjects.OpCode.PlayerMove) Console.WriteLine((int)op);
                     //Log.SaveLog(((int)op).ToString());
                     switch (op)
                     {
@@ -133,10 +133,21 @@ namespace PlaysisServer
                                 //throw;
                             }
                             break;
-                        case CommonObjects.OpCode.SyncRoomState:
+                        case CommonObjects.OpCode.SyncRoomPlayerState:
                             try
                             {
                                 peer.SendWithDeliveryEvent(Models.SyncRoomStatus(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.SyncRoomModelsState:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.SyncRoomModelStatus(peer, reader), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {

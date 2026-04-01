@@ -39,7 +39,32 @@ namespace PlaysisServer.PacketModels
             //Log.SaveLog($"已发送包，共{players.Count}玩家");
             return(writer);
         }
+        public static NetDataWriter SyncRoomModelStatus(NetPeer peer, NetPacketReader reader)
+        {
+            var writer = new NetDataWriter();
 
-        
+            // Receive Stage
+            var uid = reader.GetInt();
+            if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
+            {
+                writer.Put(0);
+                Program.ConnectedPeers.Remove(peer);
+                return writer;
+            }
+            else if ((int)userInfo["uid"] != uid)
+            {
+                writer.Put(0);
+                return writer;
+            }
+            writer.Put(1);
+            foreach (var model in ((PlayerObject)userInfo["playerObj"]).Room.Models.Values)
+            {
+                CommonObjects.PlaceModelPacket(writer, model);
+            }
+            CommonObjects.PlaceEOFPacket(writer);
+            return writer;
+        }
+
+
     }
 }

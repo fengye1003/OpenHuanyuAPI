@@ -21,10 +21,12 @@ namespace PlaysisServer.PacketModels
             PlayerSpawn,
             PlayerMove,
             SpawnModel,
-            SyncRoomState,
+            SyncRoomPlayerState,
+            SyncRoomModelsState,
+            SyncRoomNoticeState,
             Auth,
             ApiAvailabilityAuth,
-            FetchModelUpload,
+            FetchModelInfo,
             GetPlayerNameByUid,
             RequestUploadModel,
             AddModelUrl
@@ -72,6 +74,27 @@ namespace PlaysisServer.PacketModels
             result.Scale = CommonObjects.GetVector3(reader);
             result.Rotation = CommonObjects.GetVector3(reader);
             return result;
+        }
+
+        public static void PlaceModelPacket(NetDataWriter writer, ModelObject model)
+        {
+            writer.Put((byte)PacketInternalSymbols.ModelPacket);
+            writer.Put(model.ParentPlayer.UID);
+            writer.Put(model.ModelHash);
+            CommonObjects.PutVector3(writer, model.Location);
+            CommonObjects.PutVector3(writer, model.Scale);
+            CommonObjects.PutVector3(writer, model.Rotation);
+        }
+
+        public static ModelObject FetchModelPacket(NetPacketReader reader)
+        {
+            var uid = reader.GetInt();
+            var hash = reader.GetString();
+            ModelObject model = new(new PlayerObject(uid, null, null), null, null, hash);
+            model.Location = CommonObjects.GetVector3(reader);
+            model.Scale = CommonObjects.GetVector3(reader);
+            model.Rotation = CommonObjects.GetVector3(reader);
+            return model;
         }
 
         public static void PlaceEOFPacket(NetDataWriter writer)

@@ -10,14 +10,14 @@ namespace PlaysisServer.Objects
     internal class ModelObject
     {
         public readonly PlayerObject ParentPlayer;
-        public readonly string Name;
-        public readonly string FetchURL;
+        public readonly string? Name;
+        public readonly string? FetchURL;
         public Vector3 Location;
         public Vector3 Scale;
         public Vector3 Rotation;
         public readonly string ModelHash;
 
-        public ModelObject(PlayerObject parent, string name, string url, string hash)
+        public ModelObject(PlayerObject parent, string? name, string? url, string hash)
         {
             ParentPlayer = parent;
             Name = name;
