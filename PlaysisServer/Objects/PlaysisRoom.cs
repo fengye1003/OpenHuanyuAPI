@@ -12,6 +12,7 @@ namespace PlaysisServer.Objects
         public string Name;
         public PlayerObject? Owner;
         public List<PlayerObject> Players = new();
+        public Dictionary<int, ModelObject> Models = new();
 
         public PlaysisRoom(int roomId, string name, PlayerObject? owner)
         {

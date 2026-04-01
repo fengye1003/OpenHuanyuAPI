@@ -17,14 +17,11 @@ namespace PlaysisServer.Objects
         public Vector3 Rotation;
         public readonly string ModelHash;
 
-        public ModelObject(PlayerObject parent, string name, string url, Vector3 location, Vector3 scale, Vector3 rotation, string hash)
+        public ModelObject(PlayerObject parent, string name, string url, string hash)
         {
             ParentPlayer = parent;
             Name = name;
             FetchURL = url;
-            Location = location;
-            Scale = scale;
-            Rotation = rotation;
             ModelHash = hash;
         }
 
