@@ -80,6 +80,18 @@ namespace PlaysisServer
                             //throw;
                         }
                     }
+                    else if (op == CommonObjects.OpCode.FetchModelInfo)
+                    {
+                        try
+                        {
+                            peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader), 2, DeliveryMethod.ReliableOrdered, null);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.SaveLog(ex.ToString());
+                            //throw;
+                        }
+                    }
                 }
                 else
                 {

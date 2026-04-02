@@ -122,6 +122,49 @@ namespace PlaysisServer.PacketModels
                 writer.Put(0);
             return writer;
         }
+        
+        public static NetDataWriter FetchModelInfo(NetPeer peer, NetPacketReader reader)
+        {
+            //Log.SaveLog("Receive request.");
+            var writer = new NetDataWriter();
+
+            // Receive Stage
+            var uid = reader.GetInt();
+            if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
+            {
+                writer.Put(0);
+                Program.ConnectedPeers.Remove(peer);
+                return writer;
+            }
+            else if ((int)userInfo["uid"] != uid)
+            {
+                writer.Put(0);
+                return writer;
+            }
+            writer.Put(1);
+
+            var hash = reader.GetString();
+            if (File.Exists($"./ModelStorage/{hash}"))
+            {
+                writer.Put(1);
+                var content = File.ReadAllLines($"./ModelStorage/{hash}");
+                var modelOwnerUid = Convert.ToInt32((content[0]));
+                var url = content[1];
+                HttpClient client = new();
+                var api = (string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/GetUsername?uid={uid}";
+                var response = client.GetAsync(api);
+                var resContent = response.Result.Content.ReadAsStringAsync();
+                string result = resContent.Result;
+                var name = result;
+                writer.Put(modelOwnerUid);
+                writer.Put(name);
+                writer.Put(url);
+            }
+            else
+                writer.Put(0);
+            return writer;
+            
+        }
     }
 
 }
