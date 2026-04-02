@@ -32,7 +32,7 @@ namespace PlaysisServer
         {
             public const string serverVersion = "v.1.0.0.0";
             public const string availableClientVersion = "v.1.0.0.0";
-            public const int protocolLevel = 3;
+            public const int protocolLevel = 4;
         }
         
 
@@ -80,11 +80,16 @@ namespace PlaysisServer
                             //throw;
                         }
                     }
-                    else if (op == CommonObjects.OpCode.FetchModelInfo)
+                }
+                else if (channel == (byte)1)
+                {
+                    Log.SaveLog("channel 1.");
+                    var op = (CommonObjects.OpCode)reader.GetByte();
+                    if (op == CommonObjects.OpCode.FetchModelInfo)
                     {
                         try
                         {
-                            peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader), 2, DeliveryMethod.ReliableOrdered, null);
+                            peer.SendWithDeliveryEvent(Models.FetchModelInfo(peer, reader), 1, DeliveryMethod.ReliableOrdered, null);
                         }
                         catch (Exception ex)
                         {

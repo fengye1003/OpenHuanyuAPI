@@ -56,14 +56,15 @@ namespace PlaysisServer.PacketModels
             CommonObjects.PutVector3(playerMsg, scale);
             CommonObjects.PutVector3(playerMsg, rotation);
             // Broadcast Stage
-            Log.SaveLog($"Sending spawn for player {uid}");
-            foreach (var target in player.Room.Players)
-            {
-                if (target.UserNetPeer != peer)
-                {
-                    target.UserNetPeer!.Send(playerMsg, DeliveryMethod.ReliableOrdered);
-                }
-            }
+            //Log.SaveLog($"Sending spawn for player {uid}");
+            //foreach (var target in player.Room.Players)
+            //{
+            //    if (target.UserNetPeer != peer)
+            //    {
+            //        target.UserNetPeer!.Send(playerMsg, DeliveryMethod.ReliableOrdered);
+            //    }
+            //}
+            //Abandoned due to duplicated function of Sync players
 
             writer.Put(1);
             Log.SaveLog("已回调。");

@@ -75,6 +75,13 @@ namespace PlaysisServer.PacketModels
             }
             File.WriteAllText($"./ModelStorage/{hash}", $"{uid}\n{url}");
             Log.SaveLog($"成功存储模型{hash}");
+
+            ModelObject model = new ModelObject((PlayerObject)userInfo["playerObj"], ((PlayerObject)userInfo["playerObj"]).Name, url, hash);
+            model.Location = CommonObjects.GetVector3(reader);
+            model.Scale = CommonObjects.GetVector3(reader);
+            model.Rotation = CommonObjects.GetVector3(reader);
+            ((PlayerObject)userInfo["playerObj"]).Room.Models.Add(((PlayerObject)userInfo["playerObj"]).UID, model);
+            Log.SaveLog($"成功将模型{hash}加载到房间。");
             return writer;
         }
 
