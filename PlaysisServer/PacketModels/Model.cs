@@ -79,8 +79,16 @@ namespace PlaysisServer.PacketModels
             ModelObject model = new ModelObject((PlayerObject)userInfo["playerObj"], ((PlayerObject)userInfo["playerObj"]).Name, url, hash);
             model.Location = CommonObjects.GetVector3(reader);
             model.Scale = CommonObjects.GetVector3(reader);
-            model.Rotation = CommonObjects.GetVector3(reader);
-            ((PlayerObject)userInfo["playerObj"]).Room.Models.Add(((PlayerObject)userInfo["playerObj"]).UID, model);
+            model.Rotation = CommonObjects.GetVector3(reader); 
+            if (((PlayerObject)userInfo["playerObj"]).Room.Models.TryGetValue(((PlayerObject)userInfo["playerObj"]).UID, out var obj))
+            {
+                ((PlayerObject)userInfo["playerObj"]).Room.Models[((PlayerObject)userInfo["playerObj"]).UID] = model;
+            }
+            else
+            {
+                ((PlayerObject)userInfo["playerObj"]).Room.Models.Add(((PlayerObject)userInfo["playerObj"]).UID, model);
+            }
+            
             Log.SaveLog($"成功将模型{hash}加载到房间。");
             return writer;
         }
