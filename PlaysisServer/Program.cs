@@ -64,41 +64,8 @@ namespace PlaysisServer
 
             listener.NetworkReceiveEvent += ((peer, reader, channel, deliveryMethod) =>
             {
-                if (channel == (byte)2)
-                {
-                    Log.SaveLog("channel 2.");
-                    var op = (CommonObjects.OpCode)reader.GetByte();
-                    if (op == CommonObjects.OpCode.RequestUploadModel)
-                    {
-                        try
-                        {
-                            peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader), 2 , DeliveryMethod.ReliableOrdered, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SaveLog(ex.ToString());
-                            //throw;
-                        }
-                    }
-                }
-                else if (channel == (byte)1)
-                {
-                    Log.SaveLog("channel 1.");
-                    var op = (CommonObjects.OpCode)reader.GetByte();
-                    if (op == CommonObjects.OpCode.FetchModelInfo)
-                    {
-                        try
-                        {
-                            peer.SendWithDeliveryEvent(Models.FetchModelInfo(peer, reader), 1, DeliveryMethod.ReliableOrdered, null);
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.SaveLog(ex.ToString());
-                            //throw;
-                        }
-                    }
-                }
-                else
+                
+                if (true)
                 {
                     var op = (CommonObjects.OpCode)reader.GetByte();
                     //if (op != CommonObjects.OpCode.SyncRoomPlayerState && op != CommonObjects.OpCode.PlayerMove) Console.WriteLine((int)op);
@@ -108,7 +75,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.ApiAvailabilityAuth:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableUnordered, null);
+                                peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableOrdered, null);
                                 //Log.SaveLog("Sent");
                             }
                             catch (Exception ex)
@@ -186,7 +153,6 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.RequestUploadModel:
                             try
                             {
-                               // Log.SaveLog("111");
                                 peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
@@ -200,6 +166,17 @@ namespace PlaysisServer
                             {
                                 // Log.SaveLog("111");
                                 peer.SendWithDeliveryEvent(Models.SendAddModelUrl(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.FetchModelInfo:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.FetchModelInfo(peer, reader), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
