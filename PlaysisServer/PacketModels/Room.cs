@@ -12,10 +12,10 @@ namespace PlaysisServer.PacketModels
 {
     partial class Models
     {
-        public static NetDataWriter SyncRoomStatus(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter SyncRoomStatus(NetPeer peer, NetPacketReader reader, int requestId)
         {
             var writer = new NetDataWriter();
-
+            writer.Put(requestId);
             // Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
@@ -39,10 +39,10 @@ namespace PlaysisServer.PacketModels
             //Log.SaveLog($"已发送包，共{players.Count}玩家");
             return(writer);
         }
-        public static NetDataWriter SyncRoomModelStatus(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter SyncRoomModelStatus(NetPeer peer, NetPacketReader reader, int requestId)
         {
             var writer = new NetDataWriter();
-
+            writer.Put(requestId);
             // Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))

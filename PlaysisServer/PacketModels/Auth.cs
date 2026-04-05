@@ -10,9 +10,10 @@ namespace PlaysisServer.PacketModels
 {
     partial class Models
     {
-        public static NetDataWriter Auth(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter Auth(NetPeer peer, NetPacketReader reader, int requestId)
         {
             var writer = new NetDataWriter();
+            writer.Put(requestId);
             var uid = reader.GetInt();
             var passwordhash = reader.GetString();
             HttpClient client = new();

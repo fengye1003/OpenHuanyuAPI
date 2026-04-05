@@ -17,7 +17,8 @@ namespace PlaysisServer.PacketModels
     {
         public enum OpCode : byte
         {
-            JoinRoom = 1,
+            ReSyncPackets,
+            JoinRoom,
             PlayerSpawn,
             PlayerMove,
             SpawnModel,

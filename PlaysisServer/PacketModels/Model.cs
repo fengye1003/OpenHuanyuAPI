@@ -13,11 +13,11 @@ namespace PlaysisServer.PacketModels
 {
     partial class Models
     {
-        public static NetDataWriter RequestUploadModel(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter RequestUploadModel(NetPeer peer, NetPacketReader reader, int requestId)
         {
             //Log.SaveLog("Receive request.");
             var writer = new NetDataWriter();
-
+            writer.Put(requestId);
             // Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
@@ -42,11 +42,11 @@ namespace PlaysisServer.PacketModels
             return writer;
         }
 
-        public static NetDataWriter SendAddModelUrl(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter SendAddModelUrl(NetPeer peer, NetPacketReader reader, int requestId)
         {
             //Log.SaveLog("Receive request.");
             var writer = new NetDataWriter();
-
+            writer.Put(requestId);
             // Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
@@ -138,11 +138,11 @@ namespace PlaysisServer.PacketModels
             return writer;
         }
         
-        public static NetDataWriter FetchModelInfo(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter FetchModelInfo(NetPeer peer, NetPacketReader reader, int requestId)
         {
             //Log.SaveLog("Receive request.");
             var writer = new NetDataWriter();
-
+            writer.Put(requestId);
             // Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))

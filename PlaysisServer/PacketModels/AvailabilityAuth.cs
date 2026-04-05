@@ -11,10 +11,11 @@ namespace PlaysisServer.PacketModels
 {
     partial class Models
     {
-        public static NetDataWriter ApiAvailabilityAuth(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter ApiAvailabilityAuth(NetPeer peer, NetPacketReader reader, int requestId)
         {
             //Log.SaveLog("Received");
             var writer = new NetDataWriter();
+            writer.Put(requestId);
             var ver = reader.GetInt();
             if (ver != Program.AppInfo.protocolLevel)
             {

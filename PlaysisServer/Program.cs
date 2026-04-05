@@ -32,7 +32,7 @@ namespace PlaysisServer
         {
             public const string serverVersion = "v.1.0.0.0";
             public const string availableClientVersion = "v.1.0.0.0";
-            public const int protocolLevel = 4;
+            public const int protocolLevel = 5;
         }
         
 
@@ -67,15 +67,31 @@ namespace PlaysisServer
                 
                 if (true)
                 {
+                    var requestId = reader.GetInt();
                     var op = (CommonObjects.OpCode)reader.GetByte();
                     //if (op != CommonObjects.OpCode.SyncRoomPlayerState && op != CommonObjects.OpCode.PlayerMove) Console.WriteLine((int)op);
                     //Log.SaveLog(((int)op).ToString());
                     switch (op)
                     {
+                        case CommonObjects.OpCode.ReSyncPackets:
+                            try
+                            {
+                                
+                                NetDataWriter writer = new();
+                                writer.Put(reader.GetInt());
+                                peer.SendWithDeliveryEvent(writer, DeliveryMethod.ReliableOrdered, null);
+                                //Log.SaveLog("Sent");
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
                         case CommonObjects.OpCode.ApiAvailabilityAuth:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.ApiAvailabilityAuth(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                                 //Log.SaveLog("Sent");
                             }
                             catch (Exception ex)
@@ -87,7 +103,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.Auth:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.Auth(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.Auth(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -98,7 +114,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.PlayerSpawn:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.PlayerSpawn(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.PlayerSpawn(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -109,7 +125,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.PlayerMove:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.PlayerMove(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.PlayerMove(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -120,7 +136,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.SyncRoomPlayerState:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.SyncRoomStatus(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.SyncRoomStatus(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -131,7 +147,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.SyncRoomModelsState:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.SyncRoomModelStatus(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.SyncRoomModelStatus(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -142,7 +158,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.GetPlayerNameByUid:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.GetPlayerNameByUid(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.GetPlayerNameByUid(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -153,7 +169,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.RequestUploadModel:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.RequestUploadModel(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -165,7 +181,7 @@ namespace PlaysisServer
                             try
                             {
                                 // Log.SaveLog("111");
-                                peer.SendWithDeliveryEvent(Models.SendAddModelUrl(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.SendAddModelUrl(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {
@@ -176,7 +192,7 @@ namespace PlaysisServer
                         case CommonObjects.OpCode.FetchModelInfo:
                             try
                             {
-                                peer.SendWithDeliveryEvent(Models.FetchModelInfo(peer, reader), DeliveryMethod.ReliableOrdered, null);
+                                peer.SendWithDeliveryEvent(Models.FetchModelInfo(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {

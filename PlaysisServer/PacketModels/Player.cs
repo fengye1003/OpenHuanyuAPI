@@ -15,11 +15,11 @@ namespace PlaysisServer.PacketModels
 {
     partial class Models
     {
-        public static NetDataWriter PlayerSpawn(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter PlayerSpawn(NetPeer peer, NetPacketReader reader, int requestId)
         {
             
             var writer = new NetDataWriter();
-
+            writer.Put(requestId);
             // Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
@@ -71,9 +71,10 @@ namespace PlaysisServer.PacketModels
             return writer;
         }
 
-        public static NetDataWriter PlayerMove(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter PlayerMove(NetPeer peer, NetPacketReader reader, int requestId)
         {
             var writer = new NetDataWriter();
+            writer.Put(requestId);
             //Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
@@ -120,9 +121,10 @@ namespace PlaysisServer.PacketModels
 
             return writer;
         }
-        public static NetDataWriter GetPlayerNameByUid(NetPeer peer, NetPacketReader reader)
+        public static NetDataWriter GetPlayerNameByUid(NetPeer peer, NetPacketReader reader, int requestId)
         {
             var writer = new NetDataWriter();
+            writer.Put(requestId);
             //Receive Stage
             var uid = reader.GetInt();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
