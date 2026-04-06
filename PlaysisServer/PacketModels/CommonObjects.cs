@@ -30,7 +30,8 @@ namespace PlaysisServer.PacketModels
             FetchModelInfo,
             GetPlayerNameByUid,
             RequestUploadModel,
-            AddModelUrl
+            AddModelUrl,
+            CheckUidWhetherAdmin
         }
 
         public enum PacketInternalSymbols : byte
