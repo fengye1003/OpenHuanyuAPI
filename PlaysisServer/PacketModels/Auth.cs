@@ -21,7 +21,7 @@ namespace PlaysisServer.PacketModels
             var response = client.GetAsync(url);
             var content = response.Result.Content.ReadAsStringAsync();
             string result = content.Result;
-            if (result == "NotFoundUID" || result == "InvalidPasswordHash")
+            if (result == "NotFoundUID" || result == "InvalidPasswordHash" || !response.Result.IsSuccessStatusCode)
             {
                 writer.Put(0);
                 switch (result)
@@ -31,6 +31,9 @@ namespace PlaysisServer.PacketModels
                         break;
                     case "InvalidPasswordHash":
                         writer.Put(1);
+                        break;
+                    default:
+                        writer.Put(2);
                         break;
                 }
             }
