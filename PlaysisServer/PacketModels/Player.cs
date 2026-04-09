@@ -67,7 +67,7 @@ namespace PlaysisServer.PacketModels
             //Abandoned due to duplicated function of Sync players
 
             writer.Put(1);
-            Log.SaveLog("已回调。");
+            //Log.SaveLog("已回调。");
             return writer;
         }
 

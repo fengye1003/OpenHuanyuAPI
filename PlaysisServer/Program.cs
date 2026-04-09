@@ -32,7 +32,7 @@ namespace PlaysisServer
         {
             public const string serverVersion = "v.1.0.0.0";
             public const string availableClientVersion = "v.1.0.0.0";
-            public const int protocolLevel = 6;
+            public const int protocolLevel = 7;
         }
         
 
@@ -193,6 +193,28 @@ namespace PlaysisServer
                             try
                             {
                                 peer.SendWithDeliveryEvent(Models.FetchModelInfo(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.CheckUidWhetherAdmin:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.CheckUidWhetherAdmin(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
+                                //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.AdminRegister:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.AdminRegister(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
                             }
                             catch (Exception ex)
                             {

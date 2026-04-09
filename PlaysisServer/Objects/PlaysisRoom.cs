@@ -10,15 +10,17 @@ namespace PlaysisServer.Objects
     {
         public readonly int RoomID;
         public string Name;
+        public string? Description;
         public PlayerObject? Owner;
         public List<PlayerObject> Players = new();
         public Dictionary<int, ModelObject> Models = new();
 
-        public PlaysisRoom(int roomId, string name, PlayerObject? owner)
+        public PlaysisRoom(int roomId, string name, PlayerObject? owner, string? description = null)
         {
             RoomID = roomId;
             Name = name;
             Owner = owner;
+            Description = description;
         }
 
         public void JoinRoom(PlayerObject player)

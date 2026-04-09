@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections;
 using System.Net.Sockets;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace HuanyuAPI.Controllers
 {
@@ -178,20 +179,8 @@ namespace HuanyuAPI.Controllers
             {
                 if (IsAdminMethod(uid) && IsValidSecretMethod(uid, secret))
                 {
-                    if (!Directory.Exists("./PlaysisUsers/UID/" + regUID + "/"))
-                    {
-                        Directory.CreateDirectory("./PlaysisUsers/UID/" + regUID + "/");
-                    }
-                    if (!System.IO.File.Exists("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt"))
-                    {
-                        System.IO.File.Create("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt").Close();
-                    }
-                    if (!System.IO.File.Exists("./PlaysisUsers/UID/" + regUID + "/username.txt"))
-                    {
-                        System.IO.File.Create("./PlaysisUsers/UID/" + regUID + "/username.txt").Close();
-                    }
-                    System.IO.File.WriteAllText("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt", regPasswordHash);
-                    System.IO.File.WriteAllText("./PlaysisUsers/UID/" + regUID + "/username.txt", regUsername);
+                    InternalForceRegister(regUsername, regUID, regPasswordHash);
+
                     Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
                     {
                         { "{user}", ip },
@@ -222,6 +211,53 @@ namespace HuanyuAPI.Controllers
                 return "InternalError";
             }
             
+        }
+
+        [HttpGet]
+        public ActionResult<string> RegisterByAdminRawApi(string uid, string password, string regUsername, string regUID, string regPassword)
+        {
+            string route = "PlaysisServiceController.RegisterByAdmin";
+            string ip = Common.GetClientIp(HttpContext);
+            if (AuthMethod(uid,GetHash(password)))
+            {
+                InternalForceRegister(regUsername, regUID, GetHash(regPassword));
+                
+                Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
+                    {
+                        { "{user}", ip },
+                        { "{name}",  route },
+                        { "{result}", $"uid :{uid}. New user info: {regUID} pwHash={GetHash(regPassword)}, username={regUsername}" }
+                    }));
+                return "ok";
+            }
+            else
+            {
+                Log.SaveLog(l.FetchString("logActionBlocked", new Dictionary<string, string>
+                    {
+                        { "{user}", ip },
+                        { "{name}",  route },
+                        { "{details}", $"uid:{uid}; rawPassword:{password}. Failed." }
+                    }));
+                return "AuthError";
+            }
+        }
+
+        public static void InternalForceRegister(string regUsername, string regUID, string regPasswordHash)
+        {
+            if (!Directory.Exists("./PlaysisUsers/UID/" + regUID + "/"))
+            {
+                Directory.CreateDirectory("./PlaysisUsers/UID/" + regUID + "/");
+            }
+            if (!System.IO.File.Exists("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt"))
+            {
+                System.IO.File.Create("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt").Close();
+            }
+            if (!System.IO.File.Exists("./PlaysisUsers/UID/" + regUID + "/username.txt"))
+            {
+                System.IO.File.Create("./PlaysisUsers/UID/" + regUID + "/username.txt").Close();
+            }
+            System.IO.File.WriteAllText("./PlaysisUsers/UID/" + regUID + "/passwordhash.txt", regPasswordHash);
+            System.IO.File.WriteAllText("./PlaysisUsers/UID/" + regUID + "/username.txt", regUsername);
         }
 
         public ActionResult<string> ChangeUsername(string uid, string secret, string newUsername)
@@ -350,6 +386,27 @@ namespace HuanyuAPI.Controllers
             return result;
         }
 
+        static bool AuthMethod(string uid, string passwordHash)
+        {
+            try
+            {
+                if (System.IO.File.ReadAllText(
+                    "./PlaysisUsers/UID/" + 
+                    uid + "/passwordhash.txt") != passwordHash)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         static bool IsAdminMethod(string uid)
         {
             if (System.IO.File.Exists("./PlaysisUsers/UID/" + uid + "/.admin"))
@@ -369,6 +426,27 @@ namespace HuanyuAPI.Controllers
             {
                 return false;
             }
+        }
+        
+        static string GetHash(string input)
+        {
+            //Create a byte array from source data.
+            var tmpSource = ASCIIEncoding.ASCII.GetBytes(input);
+            //Compute hash based on source data.
+            var tmpHash = MD5.HashData(tmpSource);
+            //Debug.Log(ByteArrayToString(tmpHash));
+            return ByteArrayToString(tmpHash);
+        }
+
+        static string ByteArrayToString(byte[] arrInput)
+        {
+            int i;
+            StringBuilder sOutput = new StringBuilder(arrInput.Length);
+            for (i = 0; i < arrInput.Length; i++)
+            {
+                sOutput.Append(arrInput[i].ToString("X2"));
+            }
+            return sOutput.ToString();
         }
     }
 }

@@ -60,7 +60,7 @@ namespace PlaysisServer.PacketModels
             foreach (var model in ((PlayerObject)userInfo["playerObj"]).Room.Models.Values)
             {
                 CommonObjects.PlaceModelPacket(writer, model);
-                Log.SaveLog($"已发送{model.ModelHash}");
+                //Log.SaveLog($"已发送{model.ModelHash}");
             }
             CommonObjects.PlaceEOFPacket(writer);
             return writer;
