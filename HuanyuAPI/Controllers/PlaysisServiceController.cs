@@ -394,7 +394,7 @@ namespace HuanyuAPI.Controllers
             {
                 if (System.IO.File.ReadAllText(
                     "./PlaysisUsers/UID/" + 
-                    uid + "/passwordhash.txt") != passwordHash)
+                    uid + "/passwordhash.txt") == passwordHash)
                 {
                     return true;
                 }
