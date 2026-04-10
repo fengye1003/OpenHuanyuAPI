@@ -373,6 +373,8 @@ namespace HuanyuAPI.Controllers
         [HttpGet]
         public ActionResult<string> Status()
         {
+
+            CreateInstanceIfBoot();
             string route = "PlaysisServiceController.Status";
             string ip = Common.GetClientIp(HttpContext);
             var result = (string)ActiveConfig!["status"]!;

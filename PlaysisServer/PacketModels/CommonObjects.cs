@@ -34,7 +34,8 @@ namespace PlaysisServer.PacketModels
             CheckUidWhetherAdmin,
             FetchRoomList, //
             SwitchRoom, //
-            AdminRegister
+            AdminRegister,
+            CreateRoom
         }
 
         public enum PacketInternalSymbols : byte
