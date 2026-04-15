@@ -90,6 +90,19 @@ namespace PlaysisServer.PacketModels
             }
             
             Log.SaveLog($"成功将模型{hash}加载到房间。");
+            if (Program.DoMaintainHallOnReload)
+            {
+                try
+                {
+                    PublicHallHelper.Save(Program.PublicHall);
+                    Log.SaveLog("已将模型储存到本地存档备用。");
+                }
+                catch (Exception ex)
+                {
+                    Log.SaveLog($"存储存档到本地出现问题。异常：{ex}");
+                    //throw;
+                }
+            }
             return writer;
         }
 
@@ -166,7 +179,7 @@ namespace PlaysisServer.PacketModels
                 var modelOwnerUid = Convert.ToInt32((content[0]));
                 var url = content[1];
                 HttpClient client = new();
-                var api = (string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/GetUsername?uid={uid}";
+                var api = (string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/GetUsername?uid={modelOwnerUid}";
                 var response = client.GetAsync(api);
                 var resContent = response.Result.Content.ReadAsStringAsync();
                 string result = resContent.Result;

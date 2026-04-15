@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PlaysisServer.Objects
 {
-    internal class PlaysisRoom
+    public class PlaysisRoom
     {
         public readonly int RoomID;
         public string Name;

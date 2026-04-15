@@ -1,6 +1,7 @@
 ﻿using LiteNetLib;
 using LiteNetLib.Utils;
 using PlaysisServer.Essencial_Repos;
+using PlaysisServer.Essentials;
 using PlaysisServer.Objects;
 using PlaysisServer.PacketModels;
 using System.Collections;
@@ -21,16 +22,21 @@ namespace PlaysisServer
             { "appId", "null" },
             { "region", "null" },
             { "expireTime", "1800" },
-            { "limitUploadMB", "20" }
+            { "limitUploadMB", "20" },
+            { "maintainHallOnReload", "true" },
+            { "hallSavePath", "./publichall.json" }
         };
         public static Hashtable Config = new();
         public static List<NetPeer> ConnectedPeers = new();
         public static List<PlaysisRoom> Rooms = new();
         public static PlaysisRoom PublicHall = new(0, "Public Hall", null);
         public static Dictionary<NetPeer, Dictionary<string, object>> LoggedInUsers = new();
+        public static bool DoMaintainHallOnReload = true;
+        public static string HallSavePath = "./publichall.json";
+
         public class AppInfo
         {
-            public const string serverVersion = "v.1.0.0.0";
+            public const string serverVersion = "v.1.0.1.0";
             public const string availableClientVersion = "v.1.0.0.0";
             public const int protocolLevel = 7;
         }
@@ -44,6 +50,30 @@ namespace PlaysisServer
                 Directory.CreateDirectory("./Properties/");
             }
             Config = PropertiesHelper.AutoCheck(htStandard, ConfigPath);
+            try
+            {
+                DoMaintainHallOnReload = (string)Config["maintainHallOnReload"]! == "true";
+                HallSavePath = (string)Config["hallSavePath"]!;
+            }
+            catch (Exception ex)
+            {
+                Log.SaveLog(ex.ToString());
+                throw;
+            }
+
+            if (DoMaintainHallOnReload)
+            {
+                try
+                {
+                    Program.PublicHall = PublicHallHelper.Load();
+                    Log.SaveLog("从本地恢复了存档。");
+                }
+                catch (Exception ex)
+                {
+                    Log.SaveLog($"从本地恢复存档时出现问题，重新创建房间。异常：{ex}");
+                }
+            }
+            
             var listener = new EventBasedNetListener();
             var server = new NetManager(listener);
             server.ChannelsCount = 3;

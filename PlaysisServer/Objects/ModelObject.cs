@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PlaysisServer.Objects
 {
-    internal class ModelObject
+    public class ModelObject
     {
         public readonly PlayerObject ParentPlayer;
         public readonly string? Name;

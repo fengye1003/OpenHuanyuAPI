@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace PlaysisServer.Objects
 {
-    internal class PlayerObject
+    public class PlayerObject
     {
         public Vector3 Location;
         public Vector3 Scale;
