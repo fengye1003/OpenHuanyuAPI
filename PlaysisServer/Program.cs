@@ -37,8 +37,8 @@ namespace PlaysisServer
         public class AppInfo
         {
             public const string serverVersion = "v.1.0.1.0";
-            public const string availableClientVersion = "v.1.0.0.0";
-            public const int protocolLevel = 7;
+            public const string availableClientVersion = "v.1.1.0.0";
+            public const int protocolLevel = 8;
         }
         
 
