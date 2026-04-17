@@ -108,7 +108,7 @@ namespace PlaysisServer.Essentials
             }
 
             // 恢复模型
-            int modelId = 0;
+            //int modelId = 0; //叽里咕噜说什么呢
             foreach (var m in save.Models)
             {
                 if (!playerMap.TryGetValue(m.ParentUID, out var parent))
@@ -121,7 +121,7 @@ namespace PlaysisServer.Essentials
                     Rotation = m.Rotation
                 };
 
-                room.Models[modelId++] = model;
+                room.Models[m.ParentUID++] = model;
             }
 
             return room;

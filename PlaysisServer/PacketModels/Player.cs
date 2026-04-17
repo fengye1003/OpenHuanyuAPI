@@ -40,7 +40,7 @@ namespace PlaysisServer.PacketModels
             HttpClient client = new HttpClient();
             var result = client.GetStringAsync((string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/GetUsername?uid={uid}");
 
-            PlayerObject player = new(uid, result.ToString()!, (string)Program.LoggedInUsers[peer]["secret"]);
+            PlayerObject player = new(uid, result.Result, (string)Program.LoggedInUsers[peer]["secret"]);
             
             player.UserNetPeer = peer;
             player.Room = Program.PublicHall;

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TencentCloud.Mgobe.V20201014.Models;
 
 namespace PlaysisServer.PacketModels
 {
@@ -106,6 +107,7 @@ namespace PlaysisServer.PacketModels
             return writer;
         }
 
+        [Obsolete]
         public static NetDataWriter SpawnModel(NetPeer peer, NetPacketReader reader)
         {
             //Log.SaveLog("Receive request.");
@@ -143,7 +145,7 @@ namespace PlaysisServer.PacketModels
                 if (!existed)
                     ((PlayerObject)userInfo["playerObj"]).Room.Models.Add(uid, model);
                 else
-                    value = model;
+                    ((PlayerObject)userInfo["playerObj"]).Room.Models[uid] = model;
                 writer.Put(1);
             }
             else
