@@ -18,7 +18,7 @@ namespace HuanyuAPI
         static string languageStr = "unknown";
         const string DEFAULT_LANG_STR = "enus";
         public static Localization l = new();
-        static Hashtable Config = [];
+        public static Hashtable Config = [];
         static Hashtable ConfigStandard = new()
         {
             { "type", "HuanyuApiConfig"},
@@ -359,3 +359,4 @@ namespace HuanyuAPI
 
     }
 }
+

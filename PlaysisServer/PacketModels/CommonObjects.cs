@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using PlaysisServer.Objects;
 using System;
@@ -35,7 +35,8 @@ namespace PlaysisServer.PacketModels
             FetchRoomList, //
             SwitchRoom, //
             AdminRegister,
-            CreateRoom
+            CreateRoom,
+            AuthBySecret
         }
 
         public enum PacketInternalSymbols : byte
@@ -109,3 +110,4 @@ namespace PlaysisServer.PacketModels
         }
     }
 }
+

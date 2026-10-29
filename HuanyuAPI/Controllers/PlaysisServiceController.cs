@@ -1,4 +1,5 @@
-﻿using HuanyuAPI.Essencial_Repos;
+using HuanyuAPI.Auth;
+using HuanyuAPI.Essencial_Repos;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -388,6 +389,64 @@ namespace HuanyuAPI.Controllers
             return result;
         }
 
+        [HttpPost]
+        public async Task<ActionResult<string>> SchoolLogin([FromBody] SchoolLoginRequest req)
+        {
+            string route = "PlaysisServiceController.SchoolLogin";
+            string ip = Common.GetClientIp(HttpContext);
+            try
+            {
+                if (req == null || string.IsNullOrEmpty(req.Nonce))
+                    return BadRequest("InvalidRequest");
+
+                if (!NonceCache.TryUse(req.Nonce, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()))
+                    return BadRequest("Replay");
+
+                ISchoolVerifier verifier = new NjtechVerifier(
+                    (string?)Program.Config["schoolAuthEndpoint"] ?? "https://jwgl.njtech.edu.cn");
+                string? xh = await verifier.VerifyIdentityAsync(req.Cookies, HttpContext.RequestAborted);
+                if (string.IsNullOrEmpty(xh))
+                {
+                    Log.SaveLog(l.FetchString("logActionBlocked", new Dictionary<string, string>
+                    {
+                        { "{user}", ip }, { "{name}", route }, { "{details}", "verify failed" }
+                    }));
+                    return BadRequest("VerifyFailed");
+                }
+
+                if (!string.IsNullOrEmpty(req.FullId) && req.FullId != xh)
+                    return BadRequest("IdMismatch");
+
+                string year = SchoolAuthConfig.Year;
+                if (!xh.StartsWith(year, StringComparison.Ordinal) || xh.Length <= year.Length)
+                    return BadRequest("UnsupportedCohort");
+
+                string shortId = xh.Substring(year.Length);
+                if (!Directory.Exists("./PlaysisUsers/UID/" + shortId + "/"))
+                    return BadRequest("NotFoundUID");
+
+                CreateInstanceIfBoot();
+                var secret = GenerateSecret(16);
+                if (LoggedInUsers.TryGetValue(shortId, out string? _)) LoggedInUsers.Remove(shortId);
+                LoggedInUsers.Add(shortId, secret);
+                System.IO.File.WriteAllText("./PlaysisUsers/UID/" + shortId + "/secret.txt", secret);
+
+                Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
+                {
+                    { "{user}", ip }, { "{name}", route }, { "{result}", $"uid = {shortId}, xh = {xh}" }
+                }));
+                return Ok(new { uid = shortId, secret });
+            }
+            catch (Exception ex)
+            {
+                Log.SaveLog(l.FetchString("logActionWithException", new Dictionary<string, string>
+                {
+                    { "{user}", ip }, { "{name}", route }, { "{exception}", ex.ToString() }
+                }));
+                return BadRequest("InternalError");
+            }
+        }
+
         static bool AuthMethod(string uid, string passwordHash)
         {
             try
@@ -452,3 +511,6 @@ namespace HuanyuAPI.Controllers
         }
     }
 }
+
+
+

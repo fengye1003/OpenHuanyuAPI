@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
@@ -51,6 +51,36 @@ namespace PlaysisServer.PacketModels
             return writer;
         }
 
+
+        public static NetDataWriter AuthBySecret(NetPeer peer, NetPacketReader reader, int requestId)
+        {
+            var writer = new NetDataWriter();
+            writer.Put(requestId);
+
+            var uid = reader.GetInt();
+            var secret = reader.GetString();
+
+            HttpClient client = new();
+            var url = (string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/IsValidSecret?uid={uid}&secret={secret}";
+            var response = client.GetAsync(url);
+            var content = response.Result.Content.ReadAsStringAsync();
+            string result = content.Result;
+
+            if (result != "1" || !response.Result.IsSuccessStatusCode)
+            {
+                writer.Put(0);
+                return writer;
+            }
+
+            if (Program.LoggedInUsers.ContainsKey(peer)) Program.LoggedInUsers.Remove(peer);
+            Program.LoggedInUsers.Add(peer, new()
+            {
+                { "secret", secret },
+                { "uid", uid }
+            });
+            writer.Put(1);
+            return writer;
+        }
         public static NetDataWriter CheckUidWhetherAdmin(NetPeer peer, NetPacketReader reader, int requestId)
         {
             var writer = new NetDataWriter();
@@ -198,3 +228,4 @@ namespace PlaysisServer.PacketModels
         }
     }
 }
+

@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /HuanyuAPI/ImgStorages
 /HuanyuAPI/PlaysisUsers/UID
+
+# local server config
+PlaysisServer/Properties/

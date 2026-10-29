@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using PlaysisServer.Essencial_Repos;
 using PlaysisServer.Essentials;
@@ -128,6 +128,16 @@ namespace PlaysisServer
                             {
                                 Log.SaveLog(ex.ToString());
                                 //throw;
+                            }
+                            break;
+                        case CommonObjects.OpCode.AuthBySecret:
+                            try
+                            {
+                                peer.SendWithDeliveryEvent(Models.AuthBySecret(peer, reader, requestId), DeliveryMethod.ReliableOrdered, null);
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.SaveLog(ex.ToString());
                             }
                             break;
                         case CommonObjects.OpCode.Auth:
@@ -288,3 +298,4 @@ namespace PlaysisServer
 
     }
 }
+

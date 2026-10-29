@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -11,6 +11,26 @@ namespace PlaysisServer.Essencial_Repos
     public class Log
     {
         private static readonly object _fileLock = new object(); // 静态锁对象
+
+        static string _dir;
+        static string LogDir()
+        {
+            if (_dir != null) return _dir;
+            try
+            {
+                var p = Path.GetDirectoryName(Environment.ProcessPath) + "/";
+                Directory.CreateDirectory(p + "Log/");
+                var probe = p + "Log/.w";
+                File.WriteAllText(probe, "");
+                File.Delete(probe);
+                _dir = p;
+                return _dir;
+            }
+            catch { }
+            _dir = Directory.GetCurrentDirectory() + "/";
+            Directory.CreateDirectory(_dir + "Log/");
+            return _dir;
+        }
         public static bool EnableLogs = true;
         public static bool EnableWriting = true;
         /// <summary>
@@ -30,7 +50,7 @@ namespace PlaysisServer.Essencial_Repos
                     message = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "] " + message;
                     if (EnableWriting)
                     {
-                        string Path = $"{System.IO.Path.GetDirectoryName(Environment.ProcessPath)}/";
+                        string Path = LogDir();
                         
                         //空格是为了增强日志可读性,DateTime的作用是获取目前时间
                         Directory.CreateDirectory($"{Path}/Log/");
@@ -70,7 +90,7 @@ namespace PlaysisServer.Essencial_Repos
                     message = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff") + $"] [{module}] " + message;
                     if (EnableWriting)
                     {
-                        string Path = $"{System.IO.Path.GetDirectoryName(Environment.ProcessPath)}/";
+                        string Path = LogDir();
                         
                         //空格是为了增强日志可读性,DateTime的作用是获取目前时间
                         Directory.CreateDirectory($"{Path}/Log/");
@@ -110,7 +130,7 @@ namespace PlaysisServer.Essencial_Repos
                     message = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "] " + message;
                     if (EnableWriting)
                     {
-                        string Path = $"{System.IO.Path.GetDirectoryName(Environment.ProcessPath)}/";
+                        string Path = LogDir();
                         
                         //空格是为了增强日志可读性,DateTime的作用是获取目前时间
                         Directory.CreateDirectory($"{Path}/Log/");
@@ -151,7 +171,7 @@ namespace PlaysisServer.Essencial_Repos
                 message = "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff") + $"] [{module}] " + message;
                 if (EnableWriting)
                 {
-                    string Path = $"{System.IO.Path.GetDirectoryName(Environment.ProcessPath)}/";
+                    string Path = LogDir();
                     
                     //空格是为了增强日志可读性,DateTime的作用是获取目前时间
                     Directory.CreateDirectory($"{Path}/Log/");
@@ -177,7 +197,7 @@ namespace PlaysisServer.Essencial_Repos
         }
         public static void DoLogCleanUp()
         {
-            string Path = $"{System.IO.Path.GetDirectoryName(Environment.ProcessPath)}/";
+            string Path = LogDir();
             Directory.CreateDirectory($"{Path}/Log/");
             var logFilesList = Directory.GetFiles($"{Path}/Log/");
             foreach (var logPath in logFilesList)
@@ -187,7 +207,7 @@ namespace PlaysisServer.Essencial_Repos
         }
         public static void DoLogCleanUp(int saveEntries)
         {
-            string Path = $"{System.IO.Path.GetDirectoryName(Environment.ProcessPath)}/";
+            string Path = LogDir();
             Directory.CreateDirectory($"{Path}/Log/");
             var logFilesList = Directory.GetFiles($"{Path}/Log/");
             if (logFilesList.Length < saveEntries)
@@ -205,3 +225,5 @@ namespace PlaysisServer.Essencial_Repos
         }
     }
 }
+
+
