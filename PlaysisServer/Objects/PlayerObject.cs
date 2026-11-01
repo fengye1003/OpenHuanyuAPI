@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +13,7 @@ namespace PlaysisServer.Objects
         public Vector3 Location;
         public Vector3 Scale;
         public Vector3 Rotation;
-        public readonly int UID;
+        public readonly string UID;
         public string? Name;
         public string? ConnectSecret;
         public NetPeer? UserNetPeer;
@@ -43,7 +43,7 @@ namespace PlaysisServer.Objects
             }
         }
 
-        public PlayerObject(int uid, string? name, string? secret)
+        public PlayerObject(string uid, string? name, string? secret)
         {
             UID = uid;
             Name = name;
@@ -53,3 +53,4 @@ namespace PlaysisServer.Objects
 
     }
 }
+

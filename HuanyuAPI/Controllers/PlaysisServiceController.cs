@@ -421,21 +421,96 @@ namespace HuanyuAPI.Controllers
                 if (!xh.StartsWith(year, StringComparison.Ordinal) || xh.Length <= year.Length)
                     return BadRequest("UnsupportedCohort");
 
-                string shortId = xh.Substring(year.Length);
-                if (!Directory.Exists("./PlaysisUsers/UID/" + shortId + "/"))
+                string uid = xh;
+                string legacyId = xh.Substring(year.Length);
+
+                if (!Directory.Exists("./PlaysisUsers/UID/" + uid + "/"))
+                {
+                    if (Directory.Exists("./PlaysisUsers/UID/" + legacyId + "/"))
+                        Directory.Move("./PlaysisUsers/UID/" + legacyId + "/", "./PlaysisUsers/UID/" + uid + "/");
+                    else
+                        return BadRequest("NotFoundUID");
+                }
+
+                CreateInstanceIfBoot();
+                var secret = GenerateSecret(16);
+                if (LoggedInUsers.TryGetValue(uid, out string? _)) LoggedInUsers.Remove(uid);
+                LoggedInUsers.Add(uid, secret);
+                System.IO.File.WriteAllText("./PlaysisUsers/UID/" + uid + "/secret.txt", secret);
+
+                Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
+                {
+                    { "{user}", ip }, { "{name}", route }, { "{result}", $"uid = {uid}, xh = {xh}" }
+                }));
+                var token = AuthTokenStore.Issue(uid, SchoolAuthConfig2.TokenDays);
+                var expiresAt = AuthTokenStore.PeekExpiry(uid);
+                return Ok(new { uid, secret, token, expiresAt });
+            }
+            catch (Exception ex)
+            {
+                Log.SaveLog(l.FetchString("logActionWithException", new Dictionary<string, string>
+                {
+                    { "{user}", ip }, { "{name}", route }, { "{exception}", ex.ToString() }
+                }));
+                return BadRequest("InternalError");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult<string> TokenLogin([FromBody] TokenLoginRequest req)
+        {
+            string route = "PlaysisServiceController.TokenLogin";
+            string ip = Common.GetClientIp(HttpContext);
+            try
+            {
+                if (req == null || string.IsNullOrEmpty(req.Uid) || string.IsNullOrEmpty(req.Token))
+                    return BadRequest("InvalidRequest");
+
+                if (!AuthTokenStore.TryValidate(req.Uid, req.Token, out var expiresAt))
+                    return BadRequest("TokenInvalid");
+
+                if (!Directory.Exists("./PlaysisUsers/UID/" + req.Uid + "/"))
                     return BadRequest("NotFoundUID");
 
                 CreateInstanceIfBoot();
                 var secret = GenerateSecret(16);
-                if (LoggedInUsers.TryGetValue(shortId, out string? _)) LoggedInUsers.Remove(shortId);
-                LoggedInUsers.Add(shortId, secret);
-                System.IO.File.WriteAllText("./PlaysisUsers/UID/" + shortId + "/secret.txt", secret);
+                if (LoggedInUsers.TryGetValue(req.Uid, out string? _)) LoggedInUsers.Remove(req.Uid);
+                LoggedInUsers.Add(req.Uid, secret);
+                System.IO.File.WriteAllText("./PlaysisUsers/UID/" + req.Uid + "/secret.txt", secret);
 
                 Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
                 {
-                    { "{user}", ip }, { "{name}", route }, { "{result}", $"uid = {shortId}, xh = {xh}" }
+                    { "{user}", ip }, { "{name}", route }, { "{result}", $"uid = {req.Uid}" }
                 }));
-                return Ok(new { uid = shortId, secret });
+                return Ok(new { uid = req.Uid, secret, expiresAt });
+            }
+            catch (Exception ex)
+            {
+                Log.SaveLog(l.FetchString("logActionWithException", new Dictionary<string, string>
+                {
+                    { "{user}", ip }, { "{name}", route }, { "{exception}", ex.ToString() }
+                }));
+                return BadRequest("InternalError");
+            }
+        }
+
+        [HttpPost]
+        public ActionResult<string> Logout([FromBody] LogoutRequest req)
+        {
+            string route = "PlaysisServiceController.Logout";
+            string ip = Common.GetClientIp(HttpContext);
+            try
+            {
+                if (req == null || string.IsNullOrEmpty(req.Uid)) return BadRequest("InvalidRequest");
+                if (!IsValidSecretMethod(req.Uid, req.Secret)) return BadRequest("InvalidSecret");
+
+                AuthTokenStore.Revoke(req.Uid);
+                LoggedInUsers.Remove(req.Uid);
+                Log.SaveLog(l.FetchString("logActionWithResult", new Dictionary<string, string>
+                {
+                    { "{user}", ip }, { "{name}", route }, { "{result}", $"uid = {req.Uid} logged out" }
+                }));
+                return Ok("ok");
             }
             catch (Exception ex)
             {
@@ -511,6 +586,9 @@ namespace HuanyuAPI.Controllers
         }
     }
 }
+
+
+
 
 
 

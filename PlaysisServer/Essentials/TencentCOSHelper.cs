@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -112,8 +112,26 @@ namespace PlaysisServer.Essentials
             return dictionary1;
         }
 
+        public static bool LocalStorageMode
+        {
+            get
+            {
+                var id = Program.Config["tencentApiSecretId"] as string;
+                var region = Program.Config["region"] as string;
+                var bucket = Program.Config["bucket"] as string;
+                return string.IsNullOrEmpty(id) || id == "null"
+                    || string.IsNullOrEmpty(region) || region == "null"
+                    || string.IsNullOrEmpty(bucket) || bucket == "null";
+            }
+        }
+
+        public static string LocalModelOrigin()
+        {
+            return "http://127.0.0.1:1271/__models/";
+        }
         public string GetPresignedUrl(string hash)
         {
+            if (LocalStorageMode) return LocalModelOrigin() + hash;
             TencentCOSHelper m = new TencentCOSHelper();
             m.filename = hash;
             Dictionary<string, object> result = m.GetCredential();

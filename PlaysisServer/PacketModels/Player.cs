@@ -1,4 +1,4 @@
-﻿using LiteNetLib;
+using LiteNetLib;
 using LiteNetLib.Utils;
 using PlaysisServer.Essencial_Repos;
 using PlaysisServer.Objects;
@@ -21,14 +21,14 @@ namespace PlaysisServer.PacketModels
             var writer = new NetDataWriter();
             writer.Put(requestId);
             // Receive Stage
-            var uid = reader.GetInt();
+            var uid = reader.GetString();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
             {
                 writer.Put(0);
                 Program.ConnectedPeers.Remove(peer);
                 return writer;
             }
-            else if ((int)userInfo["uid"] != uid)
+            else if ((string)userInfo["uid"] != uid)
             {
                 writer.Put(0);
                 return writer;
@@ -76,7 +76,7 @@ namespace PlaysisServer.PacketModels
             var writer = new NetDataWriter();
             writer.Put(requestId);
             //Receive Stage
-            var uid = reader.GetInt();
+            var uid = reader.GetString();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
             {
                 writer.Put(0);
@@ -84,7 +84,7 @@ namespace PlaysisServer.PacketModels
                 peer.Disconnect();
                 return writer;
             }
-            else if ((int)userInfo["uid"] != uid)
+            else if ((string)userInfo["uid"] != uid)
             {
                 writer.Put(0);
                 return writer;
@@ -126,7 +126,7 @@ namespace PlaysisServer.PacketModels
             var writer = new NetDataWriter();
             writer.Put(requestId);
             //Receive Stage
-            var uid = reader.GetInt();
+            var uid = reader.GetString();
             if (!Program.LoggedInUsers.TryGetValue(peer, out var userInfo))
             {
                 writer.Put(0);
@@ -134,14 +134,14 @@ namespace PlaysisServer.PacketModels
                 peer.Disconnect();
                 return writer;
             }
-            else if ((int)userInfo["uid"] != uid)
+            else if ((string)userInfo["uid"] != uid)
             {
                 writer.Put(0);
                 return writer;
             }
             writer.Put(1);
 
-            var queryUid = reader.GetInt();
+            var queryUid = reader.GetString();
             if (!TryGetNameByUid(queryUid, out string? result)) 
             {
                 writer.Put(uid);
@@ -155,7 +155,7 @@ namespace PlaysisServer.PacketModels
             return writer;
         }
 
-        static public bool TryGetNameByUid(int uid, out string? name)
+        static public bool TryGetNameByUid(string uid, out string? name)
         {
             foreach (var item in Program.LoggedInUsers.Values)
             {
@@ -170,5 +170,58 @@ namespace PlaysisServer.PacketModels
             name = null;
             return false;
         }
-    }
-}
+    
+        public static async Task PlayerSpawnAsync(NetPeer peer, string uid, Vector3 location, Vector3 scale, Vector3 rotation, int requestId)
+        {
+            var writer = new NetDataWriter();
+            writer.Put(requestId);
+
+            Dictionary<string, object>? userInfo = null;
+            lock (Program.LoggedInUsers) Program.LoggedInUsers.TryGetValue(peer, out userInfo);
+
+            if (userInfo == null || (string)userInfo["uid"] != uid)
+            {
+                writer.Put(0);
+                Program.PendingSends.Enqueue(() =>
+                {
+                    if (peer.ConnectionState == ConnectionState.Connected)
+                        peer.SendWithDeliveryEvent(writer, DeliveryMethod.ReliableOrdered, null);
+                });
+                return;
+            }
+
+            string name = "";
+            try
+            {
+                name = await Program.Http.GetStringAsync(
+                    (string)Program.Config["huanyuApiHost"]! + $"/PlaysisService/GetUsername?uid={uid}").ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Log.SaveLog("PlayerSpawnAsync HTTP 失败: " + ex.GetType().Name + " " + ex.Message);
+            }
+
+            var player = new PlayerObject(uid, name, userInfo["secret"] as string)
+            {
+                UserNetPeer = peer,
+                Room = Program.PublicHall,
+                Location = location,
+                Scale = scale,
+                Rotation = rotation
+            };
+
+            lock (Program.LoggedInUsers) userInfo["playerObj"] = player;
+
+            writer.Put(1);
+            Program.PendingSends.Enqueue(() =>
+            {
+                if (peer.ConnectionState == ConnectionState.Connected)
+                    peer.SendWithDeliveryEvent(writer, DeliveryMethod.ReliableOrdered, null);
+            });
+        }
+    }}
+
+
+
+
+

@@ -19,6 +19,7 @@ namespace HuanyuAPI
         const string DEFAULT_LANG_STR = "enus";
         public static Localization l = new();
         public static Hashtable Config = [];
+    public static DateTime StartedUtc = DateTime.UtcNow;
         static Hashtable ConfigStandard = new()
         {
             { "type", "HuanyuApiConfig"},
@@ -30,7 +31,8 @@ namespace HuanyuAPI
             { "port", "0"},
             { "resetAppOnBoot", "true"},
             { "ipRestrict", "*"},
-            { "enableXReserveProxy", "false" }
+            { "enableXReserveProxy", "false" },
+            { "schoolAuthTokenDays", "30" }
         };
         public static void Main(string[] args)
         {
@@ -359,4 +361,6 @@ namespace HuanyuAPI
 
     }
 }
+
+
 

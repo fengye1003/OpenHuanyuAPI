@@ -36,7 +36,18 @@ namespace PlaysisServer.PacketModels
             SwitchRoom, //
             AdminRegister,
             CreateRoom,
-            AuthBySecret
+            AuthBySecret,
+            ServerPing,
+            RoomCreate,
+            RoomJoinByCode,
+            AnnotationSync,
+            RoomListChanged,
+            SetScore,
+            RoomDelete,
+            RemoveModel,
+            ModelChanged,
+            KickPlayer,
+            Kicked
         }
 
         public enum PacketInternalSymbols : byte
@@ -74,7 +85,7 @@ namespace PlaysisServer.PacketModels
         }
         public static PlayerObject FetchPlayerPacket(NetPacketReader reader)
         {
-            var uid = reader.GetInt();
+            var uid = reader.GetString();
             PlayerObject result = new(uid, null, null);
             
             result.Location = CommonObjects.GetVector3(reader);
@@ -95,7 +106,7 @@ namespace PlaysisServer.PacketModels
 
         public static ModelObject FetchModelPacket(NetPacketReader reader)
         {
-            var uid = reader.GetInt();
+            var uid = reader.GetString();
             var hash = reader.GetString();
             ModelObject model = new(new PlayerObject(uid, null, null), null, null, hash);
             model.Location = CommonObjects.GetVector3(reader);
@@ -110,4 +121,6 @@ namespace PlaysisServer.PacketModels
         }
     }
 }
+
+
 

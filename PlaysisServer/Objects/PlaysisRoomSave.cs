@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 
 namespace PlaysisServer.Objects
 {
@@ -8,7 +8,7 @@ namespace PlaysisServer.Objects
         public string Name { get; set; }
         public string? Description { get; set; }
 
-        public int? OwnerUID { get; set; }
+        public string? OwnerUID { get; set; }
 
         public List<PlayerSave> Players { get; set; } = new();
         public List<ModelSave> Models { get; set; } = new();
@@ -16,12 +16,12 @@ namespace PlaysisServer.Objects
 
     public class PlayerSave
     {
-        public int UID { get; set; }
+        public string UID { get; set; }
     }
 
     public class ModelSave
     {
-        public int ParentUID { get; set; }
+        public string ParentUID { get; set; }
 
         public string? Name { get; set; }
         public string? FetchURL { get; set; }
@@ -30,5 +30,11 @@ namespace PlaysisServer.Objects
         public Vector3 Location { get; set; }
         public Vector3 Scale { get; set; }
         public Vector3 Rotation { get; set; }
+
+        public float FootprintX { get; set; }
+        public float FootprintZ { get; set; }
+        public float OffsetX { get; set; }
+        public float OffsetZ { get; set; }
     }
 }
+

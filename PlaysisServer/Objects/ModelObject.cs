@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -17,6 +17,13 @@ namespace PlaysisServer.Objects
         public Vector3 Rotation;
         public readonly string ModelHash;
 
+        public float FootprintX;
+        public float OffsetX;
+        public float OffsetZ;
+        public float FootprintZ;
+        public float PlacementX;
+        public float PlacementZ;
+
         public ModelObject(PlayerObject parent, string? name, string? url, string hash)
         {
             ParentPlayer = parent;
@@ -28,3 +35,5 @@ namespace PlaysisServer.Objects
         
     }
 }
+
+

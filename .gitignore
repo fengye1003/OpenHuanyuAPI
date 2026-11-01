@@ -366,3 +366,11 @@ FodyWeavers.xsd
 
 # local server config
 PlaysisServer/Properties/
+# runtime data (server)
+/PlaysisServer/ModelStorage/
+/PlaysisServer/AnnotationStorage/
+/PlaysisServer/Rooms/
+/PlaysisServer/data/
+/PlaysisServer/publichall*.json
+/PlaysisServer/server-stderr.log
+/PlaysisServer/server-stdout.log

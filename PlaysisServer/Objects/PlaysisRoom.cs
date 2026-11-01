@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +13,12 @@ namespace PlaysisServer.Objects
         public string? Description;
         public PlayerObject? Owner;
         public List<PlayerObject> Players = new();
-        public Dictionary<int, ModelObject> Models = new();
+        public Dictionary<string, ModelObject> Models = new();
+        public List<AnnotationObject> Annotations = new();
+        public Dictionary<string, ScoreObject> Scores = new();
+        public long CreatedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        public int Capacity = 0;
+        public int NextAnnotationId = 1;
 
         public PlaysisRoom(int roomId, string name, PlayerObject? owner, string? description = null)
         {
@@ -37,3 +42,8 @@ namespace PlaysisServer.Objects
         }
     }
 }
+
+
+
+
+
